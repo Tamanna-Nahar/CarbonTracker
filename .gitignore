@@ -1,0 +1,14 @@
+# Ignore VS Code settings
+.vscode/
+
+# Ignore image/test files
+*.png
+*.jpg
+*.jpeg
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore environment variables
+.env
