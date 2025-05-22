@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarboTracker | Receipt Scanner</title>
+    <style>
+        :root {
+            --dark-green: #2D6A4F;
+            --medium-green: #40916C;
+            --light-green: #95D5B2;
+            --very-light-green: #D8F3DC;
+            --cream: #FFF8E8;
+            --dark-cream: #F0E6D2;
+            --text-dark: #1B4332;
+            --text-light: #FFF8E8;
+            --accent: #74C69D;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--dark-green);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .leaf-icon {
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--light-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .btn-login {
+            background-color: var(--accent);
+            color: var(--dark-green);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background-color: var(--light-green);
+            transform: translateY(-2px);
+        }
+        
+        /* Page Header */
+        .page-header {
+            background-color: var(--very-light-green);
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--dark-green);
+            margin-bottom: 1rem;
+        }
+        
+        .page-header p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+        
+        /* OCR Upload Section */
+        .ocr-section {
+            padding: 4rem 0;
+        }
+        
+        .ocr-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            background-color: var(--dark-cream);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .upload-area h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+        
+        .drag-area {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed var(--medium-green);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: 1.5rem 0;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--very-light-green);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .drag-area:hover {
+            border-color: var(--dark-green);
+            background-color: var(--light-green);
+        }
+        
+        .drag-area i {
+            font-size: 3rem;
+            color: var(--medium-green);
+            margin-bottom: 1rem;
+        }
+        
+        .drag-area h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .drag-area span {
+            font-size: 1rem;
+            color: #555;
+        }
+        
+        .file-types {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .preview-area {
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        .preview-area.active {
+            display: block;
+        }
+        
+        .preview-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--light-green);
+        }
+        
+        .upload-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--medium-green);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--dark-green);
+            border: 2px solid var(--medium-green);
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--very-light-green);
+            transform: translateY(-2px);
+        }
+        
+        /* Results Area */
+        .results-area {
+            background-color: var(--dark-cream);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-area h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+        
+        .processing-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        
+        .loader {
+            border: 5px solid var(--very-light-green);
+            border-top: 5px solid var(--dark-green);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .processing-text {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            text-align: center;
+        }
+        
+        .results-content {
+            display: none;
+        }
+        
+        .results-content.active {
+            display: block;
+        }
+        
+        .extracted-data {
+            background-color: var(--very-light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-group h3 {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            margin-bottom: 0.8rem;
+            border-bottom: 1px solid var(--light-green);
+            padding-bottom: 0.5rem;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .data-label {
+            font-weight: 600;
+        }
+        
+        .data-value {
+            color: #444;
+        }
+        
+        .carbon-footprint {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .carbon-footprint h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .carbon-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .carbon-unit {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .recommendations {
+            margin-top: 1.5rem;
+        }
+        
+        .recommendations h3 {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            margin-bottom: 1rem;
+        }
+        
+        .recommendation-list {
+            list-style: none;
+        }
+        
+        .recommendation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background-color: var(--very-light-green);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .eco-icon {
+            color: var(--dark-green);
+            font-size: 1.2rem;
+        }
+        
+        /* How it Works */
+        .how-it-works {
+            background-color: var(--very-light-green);
+            padding: 4rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--dark-green);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+        
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--medium-green);
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .step-card {
+            background-color: var(--cream);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .step-icon {
+            font-size: 3rem;
+            color: var(--medium-green);
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-card h3 {
+            font-size: 1.3rem;
+            color: var(--dark-green);
+            margin-bottom: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            padding: 4rem 0 2rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-about p {
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--accent);
+            color: var(--dark-green);
+            transform: translateY(-3px);
+        }
+        
+        .footer-links h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.7rem;
+        }
+        
+        .footer-links h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent);
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: var(--text-light);
+            opacity: 0.8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--accent);
+            padding-left: 5px;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .ocr-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span class="leaf-icon">🍃</span>
+                    <span>CarboTracker</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="index.html#features">Features</a>
+                    <a href="index.html#dashboard">Dashboard</a>
+                    <a href="index.html#about">About</a>
+                </div>
+                <button class="btn-login">Sign In</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Receipt Scanner & Carbon Analyzer</h1>
+            <p>Upload your receipts and let our AI analyze your purchases to calculate your carbon footprint and provide personalized eco-friendly recommendations.</p>
+        </div>
+    </section>
+
+    <!-- OCR Upload & Results Section -->
+    <section class="ocr-section">
+        <div class="container">
+            <div class="ocr-container">
+                <!-- Upload Area -->
+                <div class="upload-area">
+                    <h2>Upload Your Receipt</h2>
+                    <div class="drag-area" id="drop-zone">
+                        <i>📄</i>
+                        <h3>Drag & Drop Receipt</h3>
+                        <span>OR</span>
+                        <button class="btn-primary" style="margin-top: 15px;" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                        <input type="file" id="file-input" accept="image/*,.pdf">
+                        <div class="file-types">Supported formats: JPG, PNG, PDF</div>
+                    </div>
+                    <div class="preview-area" id="preview-container">
+                        <img src="" alt="Receipt Preview" class="preview-image" id="preview-image">
+                        <div class="upload-actions">
+                            <button class="btn-primary" id="process-btn">Process Receipt</button>
+                            <button class="btn-secondary" id="clear-btn">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Area -->
+                <div class="results-area">
+                    <h2>Analysis Results</h2>
+                    
+                    <!-- Processing Indicator -->
+                    <div class="processing-indicator" id="processing-indicator">
+                        <div class="loader"></div>
+                        <p class="processing-text">Your receipt is being processed.<br>Please wait a moment...</p>
+                    </div>
+                    
+                    <!-- Results Content -->
+                    <div class="results-content" id="results-content">
+                        <!-- Extracted Data -->
+                        <div class="extracted-data">
+                            <div class="data-group">
+                                <h3>Receipt Information</h3>
+                                <div class="data-item">
+                                    <span class="data-label">Store:</span>
+                                    <span class="data-value">Organic Market</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Date:</span>
+                                    <span class="data-value">May 18, 2025</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Total Amount:</span>
+                                    <span class="data-value">$47.82</span>
+                                </div>
+                            </div>
+                            
+                            <div class="data-group">
+                                <h3>Identified Products</h3>
+                                <div class="data-item">
+                                    <span class="data-label">Organic Apples (1kg)</span>
+                                    <span class="data-value">$4.99</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Bottled Water (12pk)</span>
+                                    <span class="data-value">$8.99</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Chicken Breast (2lbs)</span>
+                                    <span class="data-value">$12.49</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Frozen Pizza</span>
+                                    <span class="data-value">$6.99</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Almond Milk</span>
+                                    <span class="data-value">$3.99</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Plastic Bags</span>
+                                    <span class="data-value">$0.50</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Carbon Footprint -->
+                        <div class="carbon-footprint">
+                            <h3>Estimated Carbon Footprint</h3>
+                            <div class="carbon-value">8.4</div>
+                            <div class="carbon-unit">kg CO₂ equivalent</div>
+                        </div>
+                        
+                        <!-- Recommendations -->
+                        <div class="recommendations">
+                            <h3>Eco-Friendly Recommendations</h3>
+                            <ul class="recommendation-list">
+                                <li class="recommendation-item">
+                                    <span class="eco-icon">🌱</span>
+                                    <span>Replace bottled water with a reusable water bottle to save 5.6 kg CO₂ per month</span>
+                                </li>
+                                <li class="recommendation-item">
+                                    <span class="eco-icon">🌱</span>
+                                    <span>Consider oat milk instead of almond milk to reduce water usage and emissions</span>
+                                </li>
+                                <li class="recommendation-item">
+                                    <span class="eco-icon">🌱</span>
+                                    <span>Bring reusable bags to eliminate plastic bag waste</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+            </div>
+            <div class="steps">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">📷</div>
+                    <h3>Upload Receipt</h3>
+                    <p>Take a photo of your receipt or upload an existing image from your device</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">🔍</div>
+                    <h3>OCR Analysis</h3>
+                    <p>Our AI extracts product information and recognizes items using deep learning</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">🧮</div>
+                    <h3>Carbon Calculation</h3>
+                    <p>The system calculates the carbon footprint using our comprehensive database</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">💡</div>
+                    <h3>Smart Recommendations</h3>
+                    <p>Get personalized suggestions to reduce your environmental impact</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <span class="leaf-icon">🍃</span>
+                        <span>CarboTracker</span>
+                    </div>
+                    <p>Empowering individuals to understand and reduce their carbon footprint through advanced AI and deep learning technology.</p>
+                    <div class="social-icons">
+                        <a href="#"><span>🌐</span></a>
+                        <a href="#"><span>📱</span></a>
+                        <a href="#"><span>📘</span></a>
+                        <a href="#"><span>📸</span></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><a href="#">Receipt Scanner</a></li>
+                        <li><a href="#">Image Analysis</a></li>
+                        <li><a href="#">Smart Recommendations</a></li>
+                        <li><a href="#">Carbon Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Our Mission</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                        <li><a href="#">Partners</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 CarboTracker. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const processBtn = document.getElementById('process-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const processingIndicator = document.getElementById('processing-indicator');
+        const resultsContent = document.getElementById('results-content');
+        
+        // Hide processing and results initially
+        processingIndicator.style.display = 'none';
+        resultsContent.style.display = 'none';
+        
+        // File Upload Event Listeners
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'var(--light-green)';
+            dropZone.style.borderColor = 'var(--dark-green)';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = 'var(--very-light-green)';
+            dropZone.style.borderColor = 'var(--medium-green)';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'var(--very-light-green)';
+            dropZone.style.borderColor = 'var(--medium-green)';
+            
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+        
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            handleFile(file);
+        });
+        
+        // Handle the uploaded file
+        function handleFile(file) {
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    dropZone.style.display = 'none';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Process Button Click
+processBtn.addEventListener('click', () => {
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("Please upload a file first.");
+        return;
+    }
+
+    previewContainer.style.display = 'none';
+    processingIndicator.style.display = 'flex';
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        processingIndicator.style.display = 'none';
+        resultsContent.style.display = 'block';
+
+        // Update result area dynamically
+        const extractedData = data.map(item => `
+            <div class="data-item">
+                <span class="data-label">${item.item}</span>
+                <span class="data-value">${item.emissions.toFixed(2)} kg CO₂</span>
+            </div>
+        `).join('');
+
+        document.querySelector('.data-group:nth-of-type(2)').innerHTML = `
+            <h3>Identified Products</h3>
+            ${extractedData}
+        `;
+
+        const totalEmissions = data.reduce((sum, i) => sum + i.emissions, 0).toFixed(2);
+        document.querySelector('.carbon-value').innerText = totalEmissions;
+
+    })
+    .catch(err => {
+        processingIndicator.style.display = 'none';
+        alert("Error processing receipt.");
+        console.error(err);
+    });
+});
+
+        
+        // Clear Button Click
+        clearBtn.addEventListener('click', () => {
+            // Reset everything
+            previewContainer.style.display = 'none';
+            processingIndicator.style.display = 'none';
+            resultsContent.style.display = 'none';
+            dropZone.style.display = 'flex';
+            fileInput.value = '';
+        });
+    </script>
+</body>
+</html>

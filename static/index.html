@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarboTracker | Carbon Footprint Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark-green: #2D6A4F;
+            --medium-green: #40916C;
+            --light-green: #95D5B2;
+            --very-light-green: #D8F3DC;
+            --cream: #FFF8E8;
+            --dark-cream: #F0E6D2;
+            --text-dark: #1B4332;
+            --text-light: #FFF8E8;
+            --accent: #74C69D;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--dark-green);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .leaf-icon {
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--light-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .btn-login {
+            background-color: var(--accent);
+            color: var(--dark-green);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background-color: var(--light-green);
+            transform: translateY(-2px);
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/api/placeholder/1000/600') center/cover no-repeat;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-green);
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-dark);
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--medium-green);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--dark-green);
+            border: 2px solid var(--medium-green);
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--very-light-green);
+            transform: translateY(-2px);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background-color: var(--very-light-green);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--dark-green);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+        
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--medium-green);
+        }
+        
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--cream);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            height: 180px;
+            background-color: var(--light-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--dark-green);
+        }
+        
+        .feature-content {
+            padding: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--dark-green);
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            padding: 5rem 0;
+        }
+        
+        .upload-container {
+            background-color: var(--dark-cream);
+            border-radius: 15px;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .upload-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-green);
+        }
+        
+        .upload-container p {
+            max-width: 700px;
+            margin-bottom: 2rem;
+        }
+        
+        .drag-area {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            border: 2px dashed var(--medium-green);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: 1.5rem 0;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--very-light-green);
+        }
+        
+        .drag-area:hover {
+            border-color: var(--dark-green);
+            background-color: var(--light-green);
+        }
+        
+        .drag-area i {
+            font-size: 3rem;
+            color: var(--medium-green);
+            margin-bottom: 1rem;
+        }
+        
+        .drag-area h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .drag-area span {
+            font-size: 1rem;
+            color: #555;
+        }
+        
+        .file-types {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        /* Dashboard Preview */
+        .dashboard-preview {
+            padding: 5rem 0;
+            background-color: var(--very-light-green);
+        }
+        
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .dashboard-img {
+            max-width: 900px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            border: 1px solid var(--light-green);
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 5rem 0;
+        }
+        
+        .testimonial-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .testimonial-card {
+            background-color: var(--cream);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--medium-green);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .testimonial-text::before {
+            content: '"';
+            font-size: 4rem;
+            position: absolute;
+            left: -15px;
+            top: -20px;
+            color: var(--light-green);
+            opacity: 0.5;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--light-green);
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-green);
+            font-weight: bold;
+        }
+        
+        .author-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .author-info p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            padding: 4rem 0 2rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-about p {
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--accent);
+            color: var(--dark-green);
+            transform: translateY(-3px);
+        }
+        
+        .footer-links h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.7rem;
+        }
+        
+        .footer-links h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent);
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: var(--text-light);
+            opacity: 0.8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--accent);
+            padding-left: 5px;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .upload-container {
+                padding: 2rem 1rem;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span class="leaf-icon">🍃</span>
+                    <span>CarboTracker</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href=device.html>How It Works</a>
+                    <a href=dashboard.html>Dashboard</a>
+                    <a href="#about">About</a>
+                </div>
+                <button class="btn-login">Sign In</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Track & Reduce Your Carbon Footprint</h1>
+                <p>Upload your receipts and product images to automatically calculate your environmental impact and get personalized recommendations for a more sustainable lifestyle.</p>
+                <div class="hero-buttons">
+                    <button class="btn-primary">Upload Receipt</button>
+                    <button class="btn-secondary">Learn More</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Smart Features</h2>
+            </div>
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <div class="feature-icon">🧾</div>
+                    <div class="feature-content">
+                        <h3>Receipt Scanner</h3>
+                        <p>Automatically extract and analyze data from your shopping receipts and utility bills using advanced OCR technology.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📷</div>
+                    <div class="feature-content">
+                        <h3>Image Analysis</h3>
+                        <p>Identify products and estimate their carbon footprint directly from images using our deep learning image recognition system.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-content">
+                        <h3>Smart Recommendations</h3>
+                        <p>Get personalized suggestions for eco-friendly alternatives based on your purchase history and preferences.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="how-it-works" class="upload-section">
+        <div class="container">
+            <div class="upload-container">
+                <h2>Upload Your Receipts</h2>
+                <p>Simply upload your shopping receipts, utility bills, or product images, and our AI will automatically calculate your carbon footprint and provide personalized recommendations.</p>
+                <div class="drag-area">
+                    <i>📤</i>
+                    <h3>Drag & Drop Files</h3>
+                    <span>OR</span>
+                    <button class="btn-primary" style="margin-top: 15px;">Browse Files</button>
+                    <div class="file-types">Supported formats: JPG, PNG, PDF</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview -->
+    <section id="dashboard" class="dashboard-preview">
+        <div class="container">
+            <div class="dashboard-container">
+                <div class="section-header">
+                    <h2>Visualize Your Impact</h2>
+                </div>
+                <p>Track your carbon footprint over time, identify areas for improvement, and see the positive impact of your sustainable choices.</p>
+                <img src="/api/placeholder/900/500" alt="Dashboard Preview" class="dashboard-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>User Stories</h2>
+            </div>
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        <p>EcoTrace has completely changed how I shop. Now I can see the environmental impact of my purchases and make better choices for the planet.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-img">AM</div>
+                        <div class="author-info">
+                            <h4>Alex Morgan</h4>
+                            <p>Using EcoTrace for 6 months</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        <p>I love the personalized recommendations. I've reduced my carbon footprint by 30% in just three months following EcoTrace's suggestions!</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-img">JP</div>
+                        <div class="author-info">
+                            <h4>Jamie Parker</h4>
+                            <p>Using EcoTrace for 3 months</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        <p>The image recognition feature is amazing! I can scan products while shopping to make more sustainable choices in real-time.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-img">SL</div>
+                        <div class="author-info">
+                            <h4>Sam Lee</h4>
+                            <p>Using CarboTracker for 8 months</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <span class="leaf-icon">🍃</span>
+                        <span>CarboTracker</span>
+                    </div>
+                    <p>Empowering individuals to understand and reduce their carbon footprint through advanced AI and deep learning technology.</p>
+                    <div class="social-icons">
+                        <a href="#"><span>🌐</span></a>
+                        <a href="#"><span>📱</span></a>
+                        <a href="#"><span>📘</span></a>
+                        <a href="#"><span>📸</span></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><a href="#">Receipt Scanner</a></li>
+                        <li><a href="#">Image Analysis</a></li>
+                        <li><a href="#">Smart Recommendations</a></li>
+                        <li><a href="#">Carbon Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Our Mission</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                        <li><a href="#">Partners</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 CarboTracker. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
