@@ -103,7 +103,7 @@ def analyze_device(request_data):
         return {
             'success': True,
             'total_energy': round(total_energy, 3),
-            'total_emissions_g': round(total_emissions, 2),
+            'total_emissions': round(total_emissions, 2),  # instead of 'total_emissions_g'
             'total_emissions_kg': round(emissions_kg, 3),
             'daily_cost': round(daily_cost, 2),
             'monthly_projection': round(monthly_emissions_kg, 2),

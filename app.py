@@ -5,6 +5,7 @@ import uuid
 from ocr import extract_text, parse_receipt, estimate_carbon_emissions, CARBON_EMISSIONS
 import logging
 import device
+from transport import calculate_transport_emissions
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -33,10 +34,10 @@ def serve_dashboard():
 @app.route('/ocr')
 def serve_receipt_ocr():
     try:
-        logger.debug("Serving receipt_ocr_page (1).html")
-        return send_from_directory('static', 'receipt_ocr_page (1).html')
+        logger.debug("Serving receipt_ocr_page.html")
+        return send_from_directory('static', 'receipt_ocr_page.html')
     except Exception as e:
-        logger.error(f"Error serving receipt_ocr_page (1).html: {str(e)}")
+        logger.error(f"Error serving receipt_ocr_page.html: {str(e)}")
         return jsonify({"error": "File not found"}), 404
 
 @app.route('/device')
@@ -46,6 +47,15 @@ def serve_device_analyzer():
         return send_from_directory('static', 'device_carbon_analyzer.html')
     except Exception as e:
         logger.error(f"Error serving device_carbon_analyzer.html: {str(e)}")
+        return jsonify({"error": "File not found"}), 404
+
+@app.route('/transport')
+def serve_transport_calculator():
+    try:
+        logger.debug("Serving transport_emissions.html")
+        return send_from_directory('static', 'transport_emissions.html')
+    except Exception as e:
+        logger.error(f"Error serving transport_emissions.html: {str(e)}")
         return jsonify({"error": "File not found"}), 404
 
 @app.route('/upload', methods=['POST'])
@@ -118,6 +128,30 @@ def calculate_device_emissions():
 
     except Exception as e:
         logger.error(f"Device calculate endpoint error: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+@app.route('/transport/calculate', methods=['POST'])
+def calculate_transport_emissions_endpoint():
+    try:
+        logger.debug("Received transport calculate request")
+        data = request.get_json()
+        if not data or 'transport_mode' not in data or 'distance' not in data:
+            logger.error("Missing transport mode or distance")
+            return jsonify({"error": "Missing transport mode or distance"}), 400
+
+        transport_mode = data['transport_mode'].lower()
+        distance = float(data['distance'])
+
+        # Calculate emissions using transport.py
+        result = calculate_transport_emissions(transport_mode, distance)
+        logger.debug(f"Transport calculate response: {result}")
+        return jsonify(result)
+
+    except ValueError as e:
+        logger.error(f"Transport calculate validation error: {str(e)}")
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        logger.error(f"Transport calculate endpoint error: {str(e)}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.errorhandler(Exception)

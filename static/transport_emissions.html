@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarboTracker | Transportation Emissions Calculator</title>
+    <style>
+        :root {
+            --dark-green: #2D6A4F;
+            --medium-green: #40916C;
+            --light-green: #95D5B2;
+            --very-light-green: #D8F3DC;
+            --cream: #FFF8E8;
+            --dark-cream: #F0E6D2;
+            --text-dark: #1B4332;
+            --text-light: #FFF8E8;
+            --accent: #74C69D;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--dark-green);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .leaf-icon {
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--light-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .btn-login {
+            background-color: var(--accent);
+            color: var(--dark-green);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background-color: var(--light-green);
+            transform: translateY(-2px);
+        }
+        
+        /* Page Header */
+        .page-header {
+            background-color: var(--very-light-green);
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--dark-green);
+            margin-bottom: 1rem;
+        }
+        
+        .page-header p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+        
+        /* Input Section */
+        .ocr-section {
+            padding: 4rem 0;
+        }
+        
+        .ocr-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        
+        /* Input Area */
+        .upload-area {
+            background-color: var(--dark-cream);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .upload-area h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .input-form label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark-green);
+        }
+        
+        .input-form select, .input-form input {
+            padding: 0.8rem;
+            border: 1px solid var(--medium-green);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--very-light-green);
+            width: 100%;
+        }
+        
+        .input-form select:focus, .input-form input:focus {
+            outline: none;
+            border-color: var(--dark-green);
+        }
+        
+        .upload-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--medium-green);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--dark-green);
+            border: 2px solid var(--medium-green);
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--very-light-green);
+            transform: translateY(-2px);
+        }
+        
+        /* Results Area */
+        .results-area {
+            background-color: var(--dark-cream);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-area h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+        
+        .processing-indicator {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        
+        .loader {
+            border: 5px solid var(--very-light-green);
+            border-top: 5px solid var(--dark-green);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .processing-text {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            text-align: center;
+        }
+        
+        .results-content {
+            display: block; /* Visible by default with initial message */
+        }
+        
+        .results-content.active {
+            display: block;
+        }
+        
+        .extracted-data {
+            background-color: var(--very-light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-group h3 {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            margin-bottom: 0.8rem;
+            border-bottom: 1px solid var(--light-green);
+            padding-bottom: 0.5rem;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .data-label {
+            font-weight: 600;
+        }
+        
+        .data-value {
+            color: #444;
+        }
+        
+        .carbon-footprint {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .carbon-footprint h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .carbon-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .carbon-unit {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ocr-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span class="leaf-icon">🍃</span>
+                    <span>CarboTracker</span>
+                </div>
+                <div class="nav-links">
+                    <a href="/">Home</a>
+                    <a href="/#features">Features</a>
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/#about">About</a>
+
+                </div>
+                <button class="btn-login">Sign In</button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Transportation Emissions Calculator</h1>
+            <p>Calculate your carbon footprint from transportation by entering your travel details below.</p>
+        </div>
+    </section>
+
+    <section class="ocr-section">
+        <div class="container">
+            <div class="ocr-container">
+                <div class="upload-area">
+                    <h2>Enter Travel Details</h2>
+                    <div class="input-form">
+                        <label for="transport-mode">Transport Mode</label>
+                        <select id="transport-mode" required>
+                            <option value="" disabled selected>Select transport mode</option>
+                            <option value="car_petrol">Car (Petrol)</option>
+                            <option value="car_diesel">Car (Diesel)</option>
+                            <option value="car_electric">Car (Electric)</option>
+                            <option value="bus">Bus</option>
+                            <option value="train">Train</option>
+                            <option value="plane">Plane</option>
+
+                        </select>
+                        <label for="distance">Distance (km)</label>
+                        <input type="number" id="distance" placeholder="Enter distance in kilometers" min="0" step="any" required>
+                        <div class="upload-actions">
+                            <button class="btn-primary" onclick="calculateEmissions()">Calculate Emissions</button>
+                            <button class="btn-secondary" onclick="clearForm()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="results-area">
+                    <h2>Results</h2>
+                    <div class="processing-indicator" id="processing-indicator">
+                        <div class="loader"></div>
+                        <p class="processing-text">Processing...</p>
+                    </div>
+                    <div class="results-content" id="results-content">
+                        <div class="extracted-data">
+                            <div class="data-group">
+                                <h3>Travel Details</h3>
+                                <div class="data-item">
+                                    <span class="data-label">Transport Mode:</span>
+                                    <span class="data-value" id="result-mode">No data yet</span>
+                                </div>
+                                <div class="data-item">
+                                    <span class="data-label">Distance:</span>
+                                    <span class="data-value" id="result-distance">No data yet</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carbon-footprint">
+                            <h3>Your Carbon Footprint</h3>
+                            <div class="carbon-value" id="result-emissions">0</div>
+                            <div class="carbon-unit">kg CO2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Initialize UI on page load
+        window.onload = function() {
+            console.log('Page loaded, initializing UI');
+            document.getElementById('processing-indicator').style.display = 'none';
+            document.getElementById('results-content').style.display = 'block';
+            document.getElementById('result-mode').textContent = 'No data yet';
+            document.getElementById('result-distance').textContent = 'No data yet';
+            document.getElementById('result-emissions').textContent = '0';
+        };
+
+        async function calculateEmissions() {
+            const mode = document.getElementById('transport-mode').value;
+            const distanceInput = document.getElementById('distance').value;
+            const distance = parseFloat(distanceInput);
+            const processingIndicator = document.getElementById('processing-indicator');
+            const resultsContent = document.getElementById('results-content');
+
+            // Validate inputs
+            if (!mode) {
+                alert('Please select a transport mode.');
+                return;
+            }
+            if (isNaN(distance) || distance <= 0) {
+                alert('Please enter a valid distance greater than 0.');
+                return;
+            }
+
+            // Debugging
+            console.log('Mode:', mode);
+            console.log('Distance:', distance);
+
+            // Show processing indicator
+            processingIndicator.style.display = 'flex';
+            resultsContent.style.display = 'none';
+
+            try {
+                // Send request to Flask backend
+                const response = await fetch('/transport/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        transport_mode: mode,
+                        distance: distance
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Server response:', result);
+
+                // Update results
+                document.getElementById('result-mode').textContent = 
+                    result.transport_mode.charAt(0).toUpperCase() + result.transport_mode.slice(1);
+                document.getElementById('result-distance').textContent = result.distance_km + ' km';
+                document.getElementById('result-emissions').textContent = result.carbon_emissions_kg;
+
+                // Toggle display
+                processingIndicator.style.display = 'none';
+                resultsContent.style.display = 'block';
+            } catch (error) {
+                console.error('Error calculating emissions:', error);
+                alert('Failed to calculate emissions. Please try again.');
+                processingIndicator.style.display = 'none';
+                resultsContent.style.display = 'block';
+                document.getElementById('result-mode').textContent = 'Error';
+                document.getElementById('result-distance').textContent = 'N/A';
+                document.getElementById('result-emissions').textContent = 'N/A';
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('transport-mode').value = '';
+            document.getElementById('distance').value = '';
+            document.getElementById('processing-indicator').style.display = 'none';
+            document.getElementById('results-content').style.display = 'block';
+            document.getElementById('result-mode').textContent = 'No data yet';
+            document.getElementById('result-distance').textContent = 'No data yet';
+            document.getElementById('result-emissions').textContent = '0';
+            console.log('Form cleared');
+        }
+    </script>
+</body>
+</html>
