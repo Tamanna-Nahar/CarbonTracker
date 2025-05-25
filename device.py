@@ -1,76 +1,133 @@
-import psutil
-import time
-
-def get_carbon_intensity():
-    """Returns carbon intensity in gCO2e/kWh."""
-    default_intensity = 475  # Global average in gCO2e/kWh
-    print(f"Default carbon intensity: {default_intensity} gCO2e/kWh (global average).")
-    try:
-        user_input = input("Enter custom carbon intensity (gCO2e/kWh) or press Enter to use default: ")
-        return float(user_input) if user_input.strip() else default_intensity
-    except ValueError:
-        print("Invalid input. Using default carbon intensity.")
-        return default_intensity
-
-def estimate_power_psutil():
-    """Estimate power usage based on CPU utilization."""
-    # Typical power ranges (in watts): adjust based on your system
-    laptop_idle = 20  # Idle power for a typical laptop
-    laptop_full = 60  # Full load power for a typical laptop
-    desktop_idle = 50  # Idle power for a typical desktop
-    desktop_full = 200  # Full load power for a typical desktop
-    
-    system_type = input("Is this a laptop or desktop? (Enter 'laptop' or 'desktop', default: laptop): ").lower()
-    if system_type == 'desktop':
-        idle_power, full_power = desktop_idle, desktop_full
-    else:
-        idle_power, full_power = laptop_idle, laptop_full
-    
-    # Get CPU usage percentage (average over 1 second)
-    cpu_percent = psutil.cpu_percent(interval=1)
-    # Linearly interpolate power based on CPU usage
-    power_watts = idle_power + (full_power - idle_power) * (cpu_percent / 100)
-    return power_watts, cpu_percent
+regional_intensities = {
+    'global': 475,
+    'india': 790,
+    'usa': 400,
+    'eu': 250,
+    'china': 550,
+    'uk': 200,
+    'australia': 600
+}
 
 def calculate_emissions(power_watts, hours, carbon_intensity):
-    """Calculate carbon emissions for the computer."""
+    """Calculate energy consumption and carbon emissions for a device"""
+    if hours <= 0:
+        raise ValueError("Usage hours must be positive")
+    if power_watts <= 0:
+        raise ValueError("Power consumption must be positive")
+    
     energy_kwh = (power_watts / 1000) * hours
     emissions_g = energy_kwh * carbon_intensity
     return energy_kwh, emissions_g
 
-def main():
-    print("Computer Carbon Emissions Calculator")
-    print("Estimates carbon emissions based on CPU usage (note: running on Colab server, not your local device).\n")
+def get_reduction_tips(emissions_kg):
+    """Get personalized tips based on emission levels"""
+    tips = [
+        "💡 Enable power saving mode when not doing intensive tasks",
+        "🖥️ Lower screen brightness to reduce power consumption",
+        "⏰ Set your device to sleep/hibernate when idle",
+        "🔌 Unplug chargers and peripherals when not in use",
+        "❄️ Keep your device cool - overheating increases power usage",
+        "💾 Use SSDs instead of HDDs - they consume less power",
+        "🔄 Close unnecessary programs and browser tabs",
+        "⚙️ Update software regularly for better energy efficiency",
+        "🌙 Use dark mode themes to save display power",
+        "🔋 For portable devices: avoid keeping battery at 100% constantly"
+    ]
     
-    carbon_intensity = get_carbon_intensity()
+    if emissions_kg > 2:
+        specific_tips = [
+            "⚠️ Your daily emissions are quite high. Consider:",
+            "🎯 Reducing intensive tasks during peak grid hours",
+            "☀️ Using renewable energy sources if possible"
+        ]
+    elif emissions_kg > 1:
+        specific_tips = [
+            "📊 Your emissions are moderate. Small changes can help:",
+            "⏱️ Take regular breaks to let your device cool down"
+        ]
+    else:
+        specific_tips = [
+            "✅ Great! Your carbon footprint is relatively low.",
+            "🌱 Keep up the efficient habits!"
+        ]
     
-    # Get usage hours
-    try:
-        hours = float(input("Enter usage hours for today (e.g., 8 for 8 hours): "))
-    except ValueError:
-        print("Invalid input. Using default 8 hours.")
-        hours = 8
-    
-    # Estimate power using psutil
-    print("Estimating power based on CPU usage (Colab server environment).")
-    power_watts, cpu_percent = estimate_power_psutil()
-    
-    # Calculate emissions
-    energy_kwh, emissions_g = calculate_emissions(power_watts, hours, carbon_intensity)
-    
-    # Display results
-    print("\nCarbon Emissions Summary")
-    print(f"Carbon intensity used: {carbon_intensity} gCO2e/kWh")
-    print("-" * 40)
-    print(f"Device: Colab Server")
-    print(f"  Estimated Power: {power_watts:.2f} W")
-    print(f"  CPU Usage: {cpu_percent:.1f}%")
-    print(f"  Daily Usage: {hours:.2f} hours")
-    print(f"  Energy: {energy_kwh:.2f} kWh")
-    print(f"  Emissions: {emissions_g:.2f} gCO2e")
-    print(f"  Emissions: {(emissions_g / 1000):.2f} kgCO2e")
-    print("-" * 40)
-    print("Note: This is an estimate for the Colab server, not your local computer.")
+    return tips[:5] + specific_tips
 
-if __name__ == "__main__":
-    main()
+def analyze_device(request_data):
+    """Analyze carbon emissions for multiple devices"""
+    try:
+        carbon_intensity = float(request_data.get('carbon_intensity', 475))  
+        electricity_rate = float(request_data.get('electricity_rate', 10))   
+        
+        devices = request_data.get('devices', [])
+        
+        if not devices:
+            return {"error": "No devices provided"}
+        
+        total_energy = 0
+        total_emissions = 0
+        device_breakdown = []
+        
+        for device in devices:
+            try:
+                wattage = float(device.get('wattage', 0))
+                hours = float(device.get('hours', 0))
+                device_name = device.get('device', 'Unknown Device')
+                
+                if wattage <= 0 or hours <= 0:
+                    continue
+                
+                energy_kwh, emissions_g = calculate_emissions(wattage, hours, carbon_intensity)
+                total_energy += energy_kwh
+                total_emissions += emissions_g
+                
+                device_breakdown.append({
+                    'device': device_name,
+                    'wattage': wattage,
+                    'hours': hours,
+                    'energy_kwh': round(energy_kwh, 3),
+                    'emissions_g': round(emissions_g, 1)
+                })
+            except (ValueError, TypeError) as e:
+                continue  
+        
+        if total_energy == 0:
+            return {"error": "No valid devices found"}
+        
+        emissions_kg = total_emissions / 1000
+        daily_cost = total_energy * electricity_rate
+        annual_emissions_kg = emissions_kg * 365
+        monthly_emissions_kg = emissions_kg * 30
+        tips = get_reduction_tips(emissions_kg)
+        
+        return {
+            'success': True,
+            'total_energy': round(total_energy, 3),
+            'total_emissions_g': round(total_emissions, 2),
+            'total_emissions_kg': round(emissions_kg, 3),
+            'daily_cost': round(daily_cost, 2),
+            'monthly_projection': round(monthly_emissions_kg, 2),
+            'annual_projection': round(annual_emissions_kg, 2),
+            'device_breakdown': device_breakdown,
+            'tips': tips,
+            'carbon_intensity': carbon_intensity,
+            'electricity_rate': electricity_rate
+        }
+        
+    except Exception as e:
+        return {"error": f"Analysis failed: {str(e)}"}
+
+def get_device_presets():
+    """Return common device power consumption presets"""
+    return {
+        'laptop': {'wattage': 65, 'name': 'Laptop'},
+        'desktop': {'wattage': 200, 'name': 'Desktop Computer'},
+        'monitor': {'wattage': 30, 'name': 'Monitor (24")'},
+        'smartphone': {'wattage': 5, 'name': 'Smartphone'},
+        'tablet': {'wattage': 12, 'name': 'Tablet'},
+        'gaming_console': {'wattage': 150, 'name': 'Gaming Console'},
+        'tv': {'wattage': 100, 'name': 'LED TV (42")'},
+        'router': {'wattage': 10, 'name': 'Wi-Fi Router'},
+        'printer': {'wattage': 50, 'name': 'Inkjet Printer'},
+        'external_hdd': {'wattage': 8, 'name': 'External Hard Drive'}
+    }

@@ -1,7 +1,5 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-from PIL import Image
 import easyocr
+from PIL import Image
 import re
 import os
 import logging
@@ -10,9 +8,6 @@ import uuid
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-app = Flask(__name__, static_folder='static')
-CORS(app)
 
 # Carbon emission data (kg CO2e per unit)
 CARBON_EMISSIONS = {
@@ -54,7 +49,7 @@ def extract_text(image_path):
         results = reader.readtext(temp_path, detail=0)
         text = " ".join(results)
         logger.debug(f"Extracted text: {text}")
-        # Clean up temporary file
+
         try:
             os.remove(temp_path)
             logger.debug(f"Removed temporary file: {temp_path}")
@@ -101,77 +96,3 @@ def estimate_carbon_emissions(items):
     except Exception as e:
         logger.error(f"Emissions calculation error: {str(e)}")
         return []
-
-@app.route('/')
-@app.route('/<path:path>')
-def serve_static(path='receipt_ocr_page.html'):
-    try:
-        logger.debug(f"Serving static file: {path}")
-        return send_from_directory('static', path)
-    except Exception as e:
-        logger.error(f"Static file error: {str(e)}")
-        return jsonify({"error": "File not found"}), 404
-
-@app.route('/upload', methods=['POST'])
-def upload_receipt():
-    try:
-        logger.debug("Received upload request")
-        if 'image' not in request.files:
-            logger.error("No image uploaded")
-            return jsonify({"error": "No image uploaded"}), 400
-        
-        file = request.files['image']
-        shopping_list = request.form.get('shopping_list', '').split(',')
-        logger.debug(f"Shopping list: {shopping_list}")
-
-        # Validate file
-        if file.filename == '':
-            logger.error("No file selected")
-            return jsonify({"error": "No file selected"}), 400
-
-        # Save uploaded file
-        upload_path = f"static/upload_{uuid.uuid4().hex}.png"
-        logger.debug(f"Saving uploaded image to: {upload_path}")
-        file.save(upload_path)
-
-        # Update carbon emissions with shopping list
-        for item in shopping_list:
-            item = item.strip().lower()
-            if item and item not in CARBON_EMISSIONS:
-                CARBON_EMISSIONS[item] = 1.0
-
-        # Process receipt
-        text = extract_text(upload_path)
-        if not text:
-            logger.error("Failed to extract text from image")
-            return jsonify({"error": "Failed to extract text from image"}), 500
-
-        items = parse_receipt(text)
-        if not items:
-            logger.error("No items detected in receipt")
-            return jsonify({"error": "No items detected in receipt"}), 400
-
-        results = estimate_carbon_emissions(items)
-        logger.debug(f"Upload response: {results}")
-
-        # Clean up uploaded file
-        try:
-            os.remove(upload_path)
-            logger.debug(f"Removed uploaded file: {upload_path}")
-        except Exception as e:
-            logger.warning(f"Failed to remove uploaded file {upload_path}: {str(e)}")
-
-        return jsonify(results)
-
-    except Exception as e:
-        logger.error(f"Upload endpoint error: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    logger.error(f"Unhandled exception: {str(e)}")
-    return jsonify({"error": f"Unexpected server error: {str(e)}"}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)
-

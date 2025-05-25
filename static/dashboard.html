@@ -342,11 +342,9 @@
         </div>
     </section>
 
-    <!-- Dashboard Content -->
     <section class="dashboard-content container">
         <div class="feature-cards">
-            <!-- Receipt Scanner -->
-            <div class="feature-card" data-page="receipt_ocr_page.html">
+            <div class="feature-card" data-page="/ocr">
                 <div class="feature-icon">🧾</div>
                 <div class="feature-content">
                     <h3>Receipt Scanner</h3>
@@ -355,7 +353,6 @@
                 </div>
             </div>
 
-            <!-- Image Scanner -->
             <div class="feature-card" data-page="image.html">
                 <div class="feature-icon">📷</div>
                 <div class="feature-content">
@@ -365,8 +362,7 @@
                 </div>
             </div>
 
-            <!-- Device Usage Emissions -->
-            <div class="feature-card" data-page="device.html">
+            <div class="feature-card" data-page="/device">
                 <div class="feature-icon">💻</div>
                 <div class="feature-content">
                     <h3>Device Usage Emissions</h3>
@@ -375,7 +371,6 @@
                 </div>
             </div>
 
-            <!-- Other Emissions -->
             <div class="feature-card" data-page="activity.html">
                 <div class="feature-icon">🌍</div>
                 <div class="feature-content">
@@ -386,14 +381,12 @@
             </div>
         </div>
 
-        <!-- Carbon Footprint Chart -->
         <div class="chart-container">
             <h2 class="text-2xl font-semibold mb-4" style="color: var(--dark-green);">Carbon Footprint Overview</h2>
             <canvas id="carbonChart" style="max-height: 400px;"></canvas>
             <p class="mt-4">Track your emissions over time and see the impact of your sustainable choices.</p>
         </div>
 
-        <!-- Recommendations -->
         <div class="recommendations">
             <h2 class="text-2xl font-semibold mb-4" style="color: var(--dark-green);">Personalized Recommendations</h2>
             <ul class="list-disc pl-6">
@@ -405,7 +398,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
         <div class="container footer-content">
             <div class="footer-about">
@@ -454,9 +446,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript for Navigation and Chart -->
     <script>
-        // Initialize Carbon Footprint Chart
         const ctx = document.getElementById('carbonChart').getContext('2d');
         const carbonChart = new Chart(ctx, {
             type: 'line',
@@ -506,7 +496,6 @@
             }
         });
 
-        // Feature Card Navigation
         document.querySelectorAll('.feature-card').forEach(card => {
             card.addEventListener('click', function() {
                 const page = this.getAttribute('data-page');
@@ -516,18 +505,15 @@
             });
         });
 
-        // Fetch Emissions Data on Page Load
         async function fetchEmissionsData() {
             try {
                 const response = await fetch('http://localhost:3000/api/emissions');
                 const data = await response.json();
                 if (data.emissions && data.emissions.length > 0) {
-                    // Update chart with backend data
                     carbonChart.data.labels = data.emissions.map(e => e.date || 'Now');
                     carbonChart.data.datasets[0].data = data.emissions.map(e => e.co2);
                     carbonChart.update();
 
-                    // Update status messages
                     const lastReceipt = data.emissions.find(e => e.type === 'receipt');
                     if (lastReceipt) {
                         document.getElementById('receiptStatus').textContent = `Last receipt: ${lastReceipt.co2} kg CO₂ emitted.`;
@@ -550,7 +536,6 @@
             }
         }
 
-        // Load emissions data on page load
         window.addEventListener('load', fetchEmissionsData);
     </script>
 </body>
