@@ -23,10 +23,3 @@ CarboTracker is a web-based carbon footprint tracking application designed to he
 - Python 3.x
 - Required Python libraries (see `requirements.txt`)
 
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-username/carbotracker.git
-   cd carbotracker
