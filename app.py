@@ -35,7 +35,7 @@ def serve_dashboard():
 def serve_receipt_ocr():
     try:
         logger.debug("Serving receipt_ocr_page.html")
-        return send_from_directory('static', 'receipt_ocr_page.html')
+        return send_from_directory(app.static_folder, 'receipt_ocr_page.html')
     except Exception as e:
         logger.error(f"Error serving receipt_ocr_page.html: {str(e)}")
         return jsonify({"error": "File not found"}), 404

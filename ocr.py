@@ -20,7 +20,13 @@ CARBON_EMISSIONS = {
     "chocolate": 7.0, "milkshake": 1.8, "beer": 0.6, "wine": 1.5, "energy drink": 1.0,
     "green tea": 0.1, "shampoo": 2.3, "toothpaste": 1.0, "handwash": 1.5, "soap": 0.7,
     "facewash": 1.8, "chips": 2.0, "biscuits": 1.2, "instant noodles": 1.5, "ice cream": 3.0,
-    "coconut water": 0.3, "bottled juice": 1.0, "snack bar": 1.1
+    "coconut water": 0.3, "bottled juice": 1.0, "snack bar": 1.1, "large eggs": 0.8,"cottage cheese": 13.0,
+    "natural yogurt": 2.5,
+    "cherry tomatoes": 1.2,
+    "bananas": 0.8,
+    "cheese crackers": 1.5,
+    "chocolate cookies": 2.0,
+    "chicken breast": 6.6,
 }
 
 def preprocess_image(image_path):

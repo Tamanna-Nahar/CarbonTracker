@@ -1,3 +1,4 @@
 [{"transport_mode": "car", "distance_km": 100.0, "carbon_emissions_kg": 19.2}]
 [{"transport_mode": "car_petrol", "distance_km": 100.0, "carbon_emissions_kg": 19.2}]
 [{"transport_mode": "car_petrol", "distance_km": 100.0, "carbon_emissions_kg": 19.2}]
+[{"transport_mode": "car_electric", "distance_km": 230.0, "carbon_emissions_kg": 24.15}]
