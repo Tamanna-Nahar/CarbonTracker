@@ -1,4 +1,11 @@
-streamlit
-pytesseract
-Pillow
+flask
+flask-cors
+easyocr
+pillow
 matplotlib
+torch
+torchvision
+pytesseract
+opencv-python-headless
+numpy
+requests

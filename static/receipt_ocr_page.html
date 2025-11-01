@@ -645,6 +645,9 @@
                             <button class="btn-primary" id="process-btn">Process Receipt</button>
                             <button class="btn-secondary" id="clear-btn">Clear</button>
                         </div>
+                        <button class="btn-secondary" id="reupload-btn" style="display:none; margin-top: 10px;">
+                            Upload Another Receipt
+                        </button>
                     </div>
                 </div>
                 
@@ -815,7 +818,6 @@
             </div>
         </div>
     </footer>
-
     <script>
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
@@ -823,98 +825,103 @@
         const previewImage = document.getElementById('preview-image');
         const processBtn = document.getElementById('process-btn');
         const clearBtn = document.getElementById('clear-btn');
+        const reuploadBtn = document.getElementById('reupload-btn'); // ✅ new
         const processingIndicator = document.getElementById('processing-indicator');
         const resultsContent = document.getElementById('results-content');
-        
+
+        // Hide elements initially
         processingIndicator.style.display = 'none';
         resultsContent.style.display = 'none';
-        
+        if (reuploadBtn) reuploadBtn.style.display = 'none';
+
+        // Drag & Drop highlight
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.style.backgroundColor = 'var(--light-green)';
             dropZone.style.borderColor = 'var(--dark-green)';
         });
-        
+
         dropZone.addEventListener('dragleave', () => {
             dropZone.style.backgroundColor = 'var(--very-light-green)';
             dropZone.style.borderColor = 'var(--medium-green)';
         });
-        
+
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.style.backgroundColor = 'var(--very-light-green)';
             dropZone.style.borderColor = 'var(--medium-green)';
-            
             const file = e.dataTransfer.files[0];
             handleFile(file);
         });
-        
+
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
             handleFile(file);
         });
-        
+
         function handleFile(file) {
             if (file) {
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
                     previewImage.src = e.target.result;
                     previewContainer.style.display = 'block';
                     dropZone.style.display = 'none';
                 };
-                
                 reader.readAsDataURL(file);
             }
         }
-        
-processBtn.addEventListener('click', () => {
-    const file = fileInput.files[0];
-    if (!file) {
-        alert("Please upload a file first.");
-        return;
-    }
 
-    previewContainer.style.display = 'none';
-    processingIndicator.style.display = 'flex';
+        processBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("⚠️ Please upload a file before processing.");
+                return;
+            }
 
-    const formData = new FormData();
-    formData.append('image', file);
+            // Show buffer only if file exists
+            previewContainer.style.display = 'none';
+            processingIndicator.style.display = 'flex';
 
-    fetch('/upload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        processingIndicator.style.display = 'none';
-        resultsContent.style.display = 'block';
+            const formData = new FormData();
+            formData.append('image', file);
 
-        // Update result area dynamically
-        const extractedData = data.map(item => `
-            <div class="data-item">
-                <span class="data-label">${item.item}</span>
-                <span class="data-value">${item.emissions.toFixed(2)} kg CO₂</span>
-            </div>
-        `).join('');
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                processingIndicator.style.display = 'none';
+                resultsContent.style.display = 'block';
 
-        document.querySelector('.data-group:nth-of-type(2)').innerHTML = `
-            <h3>Identified Products</h3>
-            ${extractedData}
-        `;
+                // Hide process/clear, show reupload
+                processBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
+                if (reuploadBtn) reuploadBtn.style.display = 'inline-block';
 
-        const totalEmissions = data.reduce((sum, i) => sum + i.emissions, 0).toFixed(2);
-        document.querySelector('.carbon-value').innerText = totalEmissions;
+                // Update results
+                const extractedData = data.map(item => `
+                    <div class="data-item">
+                        <span class="data-label">${item.item}</span>
+                        <span class="data-value">${item.emissions.toFixed(2)} kg CO₂</span>
+                    </div>
+                `).join('');
 
-    })
-    .catch(err => {
-        processingIndicator.style.display = 'none';
-        alert("Error processing receipt.");
-        console.error(err);
-    });
-});
+                document.querySelector('.data-group:nth-of-type(2)').innerHTML = `
+                    <h3>Identified Products</h3>
+                    ${extractedData}
+                `;
 
-        
+                const totalEmissions = data.reduce((sum, i) => sum + i.emissions, 0).toFixed(2);
+                document.querySelector('.carbon-value').innerText = totalEmissions;
+            })
+            .catch(err => {
+                processingIndicator.style.display = 'none';
+                alert("❌ Error processing receipt. Please try again.");
+                console.error(err);
+            });
+        });
+
         clearBtn.addEventListener('click', () => {
             previewContainer.style.display = 'none';
             processingIndicator.style.display = 'none';
@@ -922,6 +929,20 @@ processBtn.addEventListener('click', () => {
             dropZone.style.display = 'flex';
             fileInput.value = '';
         });
+
+        if (reuploadBtn) {
+            reuploadBtn.addEventListener('click', () => {
+                resultsContent.style.display = 'none';
+                previewContainer.style.display = 'none';
+                dropZone.style.display = 'flex';
+                fileInput.value = '';
+
+                reuploadBtn.style.display = 'none';
+                processBtn.style.display = 'inline-block';
+                clearBtn.style.display = 'inline-block';
+            });
+        }
     </script>
-</body>
-</html>
+
+        </body>
+        </html>
