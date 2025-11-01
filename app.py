@@ -57,6 +57,18 @@ def serve_transport_calculator():
     except Exception as e:
         logger.error(f"Error serving transport_emissions.html: {str(e)}")
         return jsonify({"error": "File not found"}), 404
+    
+@app.errorhandler(404)
+def not_found_error(e):
+    return jsonify({"error": "Route not found"}), 404
+@app.route('/api/placeholder/<int:width>/<int:height>')
+def placeholder(width, height):
+    return f"Placeholder image of {width}x{height}", 200
+
+@app.errorhandler(404)
+def not_found(e):
+    return "Page not found", 404
+
 
 @app.route('/upload', methods=['POST'])
 def upload_receipt():

@@ -500,7 +500,7 @@
 
         async function fetchEmissionsData() {
             try {
-                const response = await fetch('http://localhost:3000/api/emissions');
+                const response = await fetch('/api/emissions');
                 const data = await response.json();
                 if (data.emissions && data.emissions.length > 0) {
                     carbonChart.data.labels = data.emissions.map(e => e.date || 'Now');
