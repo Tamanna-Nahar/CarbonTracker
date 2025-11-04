@@ -542,6 +542,20 @@
             </div>
         </div>
     </section>
+    <section class="graph-section" style="padding: 4rem 0; background-color: var(--very-light-green);">
+        <div class="container">
+            <h2 style="text-align:center; margin-bottom:1.5rem; color:var(--dark-green);">Emissions History</h2>
+
+            <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;">
+                <button id="btn-all"   class="btn-primary" style="padding:0.6rem 1.2rem;">All History</button>
+                <button id="btn-last10" class="btn-secondary" style="padding:0.6rem 1.2rem;">Last 10</button>
+            </div>
+
+            <div style="position:relative; height:400px; max-width:900px; margin:0 auto;">
+                <canvas id="emissionsChart"></canvas>
+            </div>
+        </div>
+    </section>
         <footer>
         <div class="container footer-content">
             <div class="footer-about">
@@ -677,6 +691,80 @@
             document.getElementById('result-emissions').textContent = '0';
             console.log('Form cleared');
         }
+    </script>
+    <!-- Chart.js CDN + Graph Script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartInstance = null;
+        const HISTORY_URL = '/transport/history';
+
+        async function loadHistory(limit = null) {
+            try {
+                const resp = await fetch(HISTORY_URL);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const records = await resp.json();
+
+                let data = records;
+                if (limit) data = data.slice(-limit);
+
+                const labels = data.map((_, i) => `Trip ${i + 1}`);
+                const values = data.map(r => r.carbon_emissions_kg);
+
+                if (chartInstance) chartInstance.destroy();
+
+                const ctx = document.getElementById('emissionsChart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'kg CO₂',
+                            data: values,
+                            borderColor: 'rgba(45,106,79,1)',
+                            backgroundColor: 'rgba(45,106,79,0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { mode: 'index', intersect: false },
+                            title: {
+                                display: true,
+                                text: limit ? 'Last 10 Trips' : 'All History'
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'kg CO₂' } },
+                            x: { title: { display: true, text: 'Trip' } }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to load history:', e);
+                alert('Could not load history – check server logs.');
+            }
+        }
+
+        // Toggle buttons
+        document.getElementById('btn-all').onclick = () => {
+            document.getElementById('btn-all').classList.replace('btn-secondary','btn-primary');
+            document.getElementById('btn-last10').classList.replace('btn-primary','btn-secondary');
+            loadHistory();
+        };
+        document.getElementById('btn-last10').onclick = () => {
+            document.getElementById('btn-last10').classList.replace('btn-secondary','btn-primary');
+            document.getElementById('btn-all').classList.replace('btn-primary','btn-secondary');
+            loadHistory(10);
+        };
+
+        // Auto-load last 10 on page load
+        window.addEventListener('load', () => {
+            document.getElementById('btn-last10').click();
+        });
     </script>
 </body>
 </html>

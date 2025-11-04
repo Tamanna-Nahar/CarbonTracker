@@ -6,6 +6,7 @@ from ocr import extract_text, parse_receipt, estimate_carbon_emissions, CARBON_E
 import logging
 import device
 from transport import calculate_transport_emissions
+import json
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -165,6 +166,33 @@ def calculate_transport_emissions_endpoint():
     except Exception as e:
         logger.error(f"Transport calculate endpoint error: {str(e)}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
+    
+@app.route('/transport/history')
+def transport_history():
+    """
+    Return a JSON array with every entry that was appended to
+    static/transport_emissions.json by calculate_transport_emissions().
+    """
+    json_path = os.path.join(app.static_folder, 'transport_emissions.json')
+
+    if not os.path.exists(json_path):
+        return jsonify([])                     # file not created yet → empty list
+
+    history = []
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line:                       # skip empty lines
+                    # each line = "[{...}]"  → we stored a list with one dict
+                    record = json.loads(line)[0]
+                    history.append(record)
+    except Exception as e:
+        logger.error(f"Failed to read transport history: {e}")
+        return jsonify([])
+
+    return jsonify(history)
+
 
 @app.errorhandler(Exception)
 def handle_exception(e):
