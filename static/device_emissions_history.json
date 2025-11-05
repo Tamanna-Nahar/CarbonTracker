@@ -1,0 +1,25 @@
+{"timestamp":"2025-10-25T06:12:33.456789Z","device":"Laptop (Basic)","emissions_kg":0.071,"energy_kwh":0.15,"wattage":45.0,"hours":3.3}
+{"timestamp":"2025-10-25T06:12:33.456900Z","device":"All Devices","emissions_kg":0.071,"energy_kwh":0.15,"daily_cost":1.5}
+{"timestamp":"2025-10-27T08:45:11.223344Z","device":"TV (55\")","emissions_kg":0.475,"energy_kwh":0.6,"wattage":120.0,"hours":5.0}
+{"timestamp":"2025-10-27T08:45:11.223500Z","device":"All Devices","emissions_kg":0.475,"energy_kwh":0.6,"daily_cost":6.0}
+{"timestamp":"2025-10-28T14:22:05.887766Z","device":"Desktop (Basic)","emissions_kg":0.95,"energy_kwh":1.2,"wattage":200.0,"hours":6.0}
+{"timestamp":"2025-10-28T14:22:05.887900Z","device":"All Devices","emissions_kg":0.95,"energy_kwh":1.2,"daily_cost":12.0}
+{"timestamp":"2025-10-30T09:11:47.112233Z","device":"AC","emissions_kg":3.325,"energy_kwh":4.2,"wattage":2000.0,"hours":2.1}
+{"timestamp":"2025-10-30T09:11:47.112400Z","device":"All Devices","emissions_kg":3.325,"energy_kwh":4.2,"daily_cost":42.0}
+{"timestamp":"2025-11-01T12:30:22.556677Z","device":"Mobile","emissions_kg":0.024,"energy_kwh":0.05,"wattage":5.0,"hours":10.0}
+{"timestamp":"2025-11-01T12:30:22.556800Z","device":"All Devices","emissions_kg":0.024,"energy_kwh":0.05,"daily_cost":0.5}
+{"timestamp":"2025-11-02T18:05:44.778899Z","device":"Refrigerator","emissions_kg":1.425,"energy_kwh":1.8,"wattage":150.0,"hours":12.0}
+{"timestamp":"2025-11-02T18:05:44.779000Z","device":"All Devices","emissions_kg":1.425,"energy_kwh":1.8,"daily_cost":18.0}
+{"timestamp":"2025-11-03T07:55:19.334455Z","device":"Laptop (Gaming)","emissions_kg":1.425,"energy_kwh":1.8,"wattage":120.0,"hours":15.0}
+{"timestamp":"2025-11-03T07:55:19.334600Z","device":"All Devices","emissions_kg":1.425,"energy_kwh":1.8,"daily_cost":18.0}
+{"timestamp":"2025-11-04T10:20:55.667788Z","device":"TV (55\")","emissions_kg":0.285,"energy_kwh":0.36,"wattage":120.0,"hours":3.0}
+{"timestamp":"2025-11-04T10:20:55.667900Z","device":"Laptop (Basic)","emissions_kg":0.071,"energy_kwh":0.15,"wattage":45.0,"hours":3.3}
+{"timestamp":"2025-11-04T10:20:55.668000Z","device":"All Devices","emissions_kg":0.356,"energy_kwh":0.51,"daily_cost":5.1}
+{"timestamp":"2025-11-05T07:28:22.127245Z","device":"Laptop (Basic)","emissions_kg":0.071,"energy_kwh":0.15,"wattage":45.0,"hours":3.3}
+{"timestamp":"2025-11-05T07:28:22.127400Z","device":"All Devices","emissions_kg":0.071,"energy_kwh":0.15,"daily_cost":1.5}
+{"timestamp":"2025-11-05T07:45:02.437328Z","device":"TV (55\")","emissions_kg":0.664,"energy_kwh":0.84,"wattage":120.0,"hours":7.0}
+{"timestamp":"2025-11-05T07:45:02.437507Z","device":"All Devices","emissions_kg":0.664,"energy_kwh":0.84,"daily_cost":8.4}
+{"timestamp":"2025-11-05T07:45:16.606843Z","device":"Desktop (Basic)","emissions_kg":1.106,"energy_kwh":1.4,"wattage":200.0,"hours":7.0}
+{"timestamp":"2025-11-05T07:45:16.607013Z","device":"All Devices","emissions_kg":1.106,"energy_kwh":1.4,"daily_cost":14.0}
+{"timestamp":"2025-11-05T07:46:50.831268Z","device":"Laptop (Gaming)","emissions_kg":0.948,"energy_kwh":1.2,"wattage":120.0,"hours":10.0}
+{"timestamp":"2025-11-05T07:46:50.831436Z","device":"All Devices","emissions_kg":0.948,"energy_kwh":1.2,"daily_cost":12.0}

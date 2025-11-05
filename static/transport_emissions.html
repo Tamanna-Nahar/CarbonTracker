@@ -541,6 +541,13 @@
                 </div>
             </div>
         </div>
+        <!-- ==================== NEW SUGGESTIONS SECTION ==================== -->
+        <div class="suggestions-area" style="margin-top: 3rem; background-color: var(--dark-cream); border-radius: 15px; padding: 2.5rem; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);">
+            <h2 style="font-size: 1.8rem; color: var(--dark-green); margin-bottom: 1.5rem;">AI Personalized Suggestions</h2>
+            <div id="suggestions-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                <p style="color: var(--medium-green); font-style: italic;">Calculate a trip to get personalized tips!</p>
+            </div>
+        </div>
     </section>
     <section class="graph-section" style="padding: 4rem 0; background-color: var(--very-light-green);">
         <div class="container">
@@ -549,6 +556,7 @@
             <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;">
                 <button id="btn-all"   class="btn-primary" style="padding:0.6rem 1.2rem;">All History</button>
                 <button id="btn-last10" class="btn-secondary" style="padding:0.6rem 1.2rem;">Last 10</button>
+                <button id="btn-prediction" class="btn-secondary" style="padding:0.6rem 1.2rem;">Show Prediction</button>
             </div>
 
             <div style="position:relative; height:400px; max-width:900px; margin:0 auto;">
@@ -603,139 +611,332 @@
             <p>© 2025 CarboTracker. All rights reserved.</p>
         </div>
     </footer>
+<script>
+    // GLOBAL STATE – shared by all functions
+    let currentLimit = 10;      // default: Last 10 trips
+    let showPrediction = false; // default: prediction off
 
+    // Initialize UI on page load
+    window.onload = function() {
+        console.log('Page loaded, initializing UI');
+        document.getElementById('processing-indicator').style.display = 'none';
+        document.getElementById('results-content').style.display = 'block';
+        document.getElementById('result-mode').textContent = 'No data yet';
+        document.getElementById('result-distance').textContent = 'No data yet';
+        document.getElementById('result-emissions').textContent = '0';
 
-    <script>
-        // Initialize UI on page load
-        window.onload = function() {
-            console.log('Page loaded, initializing UI');
-            document.getElementById('processing-indicator').style.display = 'none';
-            document.getElementById('results-content').style.display = 'block';
-            document.getElementById('result-mode').textContent = 'No data yet';
-            document.getElementById('result-distance').textContent = 'No data yet';
-            document.getElementById('result-emissions').textContent = '0';
-        };
+        // Load graph on first page load
+        loadHistory(currentLimit, showPrediction);
 
-        async function calculateEmissions() {
-            const mode = document.getElementById('transport-mode').value;
-            const distanceInput = document.getElementById('distance').value;
-            const distance = parseFloat(distanceInput);
-            const processingIndicator = document.getElementById('processing-indicator');
-            const resultsContent = document.getElementById('results-content');
+        // Load suggestions on first page load
+        fetch('/transport/history')
+            .then(resp => resp.json())
+            .then(fullRecords => generateSuggestions(fullRecords))
+            .catch(() => console.error('Failed to load initial suggestions'));
+    };
 
-            // Validate inputs
-            if (!mode) {
-                alert('Please select a transport mode.');
-                return;
-            }
-            if (isNaN(distance) || distance <= 0) {
-                alert('Please enter a valid distance greater than 0.');
-                return;
-            }
+    async function calculateEmissions() {
+        const mode = document.getElementById('transport-mode').value;
+        const distanceInput = document.getElementById('distance').value;
+        const distance = parseFloat(distanceInput);
+        const processingIndicator = document.getElementById('processing-indicator');
+        const resultsContent = document.getElementById('results-content');
 
-            // Debugging
-            console.log('Mode:', mode);
-            console.log('Distance:', distance);
-
-            // Show processing indicator
-            processingIndicator.style.display = 'flex';
-            resultsContent.style.display = 'none';
-
-            try {
-                // Send request to Flask backend
-                const response = await fetch('/transport/calculate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        transport_mode: mode,
-                        distance: distance
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                console.log('Server response:', result);
-
-                // Update results
-                document.getElementById('result-mode').textContent = 
-                    result.transport_mode.charAt(0).toUpperCase() + result.transport_mode.slice(1);
-                document.getElementById('result-distance').textContent = result.distance_km + ' km';
-                document.getElementById('result-emissions').textContent = result.carbon_emissions_kg;
-
-                // Toggle display
-                processingIndicator.style.display = 'none';
-                resultsContent.style.display = 'block';
-            } catch (error) {
-                console.error('Error calculating emissions:', error);
-                alert('Failed to calculate emissions. Please try again.');
-                processingIndicator.style.display = 'none';
-                resultsContent.style.display = 'block';
-                document.getElementById('result-mode').textContent = 'Error';
-                document.getElementById('result-distance').textContent = 'N/A';
-                document.getElementById('result-emissions').textContent = 'N/A';
-            }
+        // Validate inputs
+        if (!mode) {
+            alert('Please select a transport mode.');
+            return;
+        }
+        if (isNaN(distance) || distance <= 0) {
+            alert('Please enter a valid distance greater than 0.');
+            return;
         }
 
-        function clearForm() {
-            document.getElementById('transport-mode').value = '';
-            document.getElementById('distance').value = '';
-            document.getElementById('processing-indicator').style.display = 'none';
-            document.getElementById('results-content').style.display = 'block';
-            document.getElementById('result-mode').textContent = 'No data yet';
-            document.getElementById('result-distance').textContent = 'No data yet';
-            document.getElementById('result-emissions').textContent = '0';
-            console.log('Form cleared');
+        console.log('Mode:', mode);
+        console.log('Distance:', distance);
+
+        // Show processing
+        processingIndicator.style.display = 'flex';
+        resultsContent.style.display = 'none';
+
+        try {
+            const response = await fetch('/transport/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    transport_mode: mode,
+                    distance: distance
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Server response:', result);
+
+            // Update results
+            document.getElementById('result-mode').textContent = 
+                result.transport_mode.charAt(0).toUpperCase() + result.transport_mode.slice(1);
+            document.getElementById('result-distance').textContent = result.distance_km + ' km';
+            document.getElementById('result-emissions').textContent = result.carbon_emissions_kg;
+
+            // Refresh graph with current settings
+            loadHistory(currentLimit, showPrediction);
+
+            // Refresh suggestions with full history
+            fetch('/transport/history')
+                .then(resp => resp.json())
+                .then(fullRecords => generateSuggestions(fullRecords))
+                .catch(() => console.error('Failed to load suggestions'));
+
+            // Hide loader, show results
+            processingIndicator.style.display = 'none';
+            resultsContent.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error calculating emissions:', error);
+            alert('Failed to calculate emissions. Please try again.');
+            processingIndicator.style.display = 'none';
+            resultsContent.style.display = 'block';
+            document.getElementById('result-mode').textContent = 'Error';
+            document.getElementById('result-distance').textContent = 'N/A';
+            document.getElementById('result-emissions').textContent = 'N/A';
         }
-    </script>
-    <!-- Chart.js CDN + Graph Script -->
+    }
+
+    function generateSuggestions(records) {
+        const suggestionsList = document.getElementById('suggestions-list');
+        suggestionsList.innerHTML = '';  // clear old
+
+        if (records.length === 0) {
+            suggestionsList.innerHTML = '<p style="color: var(--medium-green); font-style: italic;">No data yet – make a trip calculation!</p>';
+            return;
+        }
+
+        // --- Analyze data ---
+        const totalEmissions = records.reduce((sum, r) => sum + r.carbon_emissions_kg, 0);
+        const avgDistance = records.reduce((sum, r) => sum + r.distance_km, 0) / records.length;
+        const modeCounts = {};
+        records.forEach(r => {
+            const mode = r.transport_mode.replace('_', ' ');  // e.g., car_petrol → car petrol
+            modeCounts[mode] = (modeCounts[mode] || 0) + 1;
+        });
+        const mostUsedMode = Object.keys(modeCounts).reduce((a, b) => modeCounts[a] > modeCounts[b] ? a : b);
+
+        // --- Generate tips ---
+        const tips = [];
+
+        // Tip 1: Most used mode
+        if (mostUsedMode.includes('petrol') || mostUsedMode.includes('diesel')) {
+            tips.push(`You've used <strong>${mostUsedMode}</strong> ${modeCounts[mostUsedMode]} times. Switch to <strong>electric car</strong> to save ~45% emissions!`);
+        } else if (mostUsedMode.includes('car')) {
+            tips.push(`Frequent car user? For trips under 5 km, <strong>walk or bike</strong> to save 100% emissions.`);
+        }
+
+        // Tip 2: Long trips
+        const longTrips = records.filter(r => r.distance_km > 500);
+        if (longTrips.length > 0) {
+            tips.push(`You have ${longTrips.length} long trips (>500 km). Use <strong>trains</strong> instead of planes to cut emissions by up to 84%!`);
+        }
+
+        // Tip 3: Average distance
+        if (avgDistance > 100) {
+            tips.push(`Your average trip is <strong>${avgDistance.toFixed(0)} km</strong>. Try <strong>carpooling</strong> to reduce per-person emissions by 50%.`);
+        }
+
+        // Tip 4: Total impact
+        const treesNeeded = Math.ceil(totalEmissions / 22);  // ~22 kg CO₂ per tree/year
+        tips.push(`Your total: <strong>${totalEmissions.toFixed(1)} kg CO₂</strong> – that's like ${treesNeeded} trees needed to offset! Plant one?`);
+
+        // Tip 5: Improvement goal
+        const lastEmission = records[records.length - 1].carbon_emissions_kg;
+        const prevAvg = records.slice(0, -1).reduce((sum, r) => sum + r.carbon_emissions_kg, 0) / Math.max(1, records.length - 1);
+        if (lastEmission < prevAvg * 0.9) {
+            tips.push(`Great job! Your last trip emitted <strong>${(100 - (lastEmission / prevAvg * 100)).toFixed(0)}% less</strong> than average. Keep it up!`);
+        }
+
+        // --- Display ---
+        if (tips.length === 0) {
+            suggestionsList.innerHTML = '<p style="color: var(--accent);">You\'re already eco-friendly! Keep tracking.</p>';
+        } else {
+            tips.forEach(tip => {
+                const div = document.createElement('div');
+                div.style.cssText = 'background: var(--very-light-green); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--medium-green);';
+                div.innerHTML = tip;
+                suggestionsList.appendChild(div);
+            });
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('transport-mode').value = '';
+        document.getElementById('distance').value = '';
+        document.getElementById('processing-indicator').style.display = 'none';
+        document.getElementById('results-content').style.display = 'block';
+        document.getElementById('result-mode').textContent = 'No data yet';
+        document.getElementById('result-distance').textContent = 'No data yet';
+        document.getElementById('result-emissions').textContent = '0';
+        console.log('Form cleared');
+    }
+</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let chartInstance = null;
         const HISTORY_URL = '/transport/history';
 
-        async function loadHistory(limit = null) {
+        // Wait for DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnAll = document.getElementById('btn-all');
+            const btnLast10 = document.getElementById('btn-last10');
+            const btnPrediction = document.getElementById('btn-prediction');
+
+            if (!btnAll || !btnLast10 || !btnPrediction) {
+                console.error('Buttons not found!');
+                return;
+            }
+
+            // ——— UPDATE BUTTON CLASSES ———
+            function updateButtonClasses(activeId) {
+                ['btn-all', 'btn-last10', 'btn-prediction'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (!btn) return;
+                    const isActive = id === activeId;
+                    btn.classList.toggle('btn-primary', isActive);
+                    btn.classList.toggle('btn-secondary', !isActive);
+                });
+            }
+
+            // ——— BUTTON HANDLERS ———
+            btnAll.onclick = () => {
+                currentLimit = null;
+                updateButtonClasses('btn-all');
+                loadHistory(currentLimit, showPrediction);
+                fetchSuggestions();
+            };
+
+            btnLast10.onclick = () => {
+                currentLimit = 10;
+                updateButtonClasses('btn-last10');
+                loadHistory(currentLimit, showPrediction);
+                fetchSuggestions();
+            };
+
+            btnPrediction.onclick = () => {
+                showPrediction = !showPrediction;
+                btnPrediction.textContent = showPrediction ? 'Hide Prediction' : 'Show Prediction';
+                updateButtonClasses(showPrediction ? 'btn-prediction' : 'btn-last10'); // keep last10 active if prediction toggled
+                loadHistory(currentLimit, showPrediction);
+                fetchSuggestions();
+            };
+
+            // ——— HELPER: Refresh suggestions ———
+            function fetchSuggestions() {
+                fetch('/transport/history')
+                    .then(r => r.json())
+                    .then(records => generateSuggestions(records))
+                    .catch(() => console.error('Failed to refresh suggestions'));
+            }
+
+            // Initial load
+            updateButtonClasses('btn-last10');
+            loadHistory(currentLimit, showPrediction);
+            fetchSuggestions();
+        });
+        
+        // Linear regression: returns slope & intercept (or null if <5 points)
+        function linearRegression(x, y) {
+            if (x.length < 5) return null;
+            const n = x.length;
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((a, xi, i) => a + xi * y[i], 0);
+            const sumX2 = x.reduce((a, xi) => a + xi * xi, 0);
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            return { slope, intercept };
+        }
+
+        async function loadHistory(limit = null, predict = false) {
             try {
                 const resp = await fetch(HISTORY_URL);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const records = await resp.json();
 
-                let data = records;
-                if (limit) data = data.slice(-limit);
+                // Apply limit
+                let data = limit ? records.slice(-limit) : records;
+                if (data.length === 0) {
+                    data = [{ carbon_emissions_kg: 0 }]; // fallback
+                }
 
-                const labels = data.map((_, i) => `Trip ${i + 1}`);
-                const values = data.map(r => r.carbon_emissions_kg);
+                // Historical data
+                const histX = data.map((_, i) => i + 1);
+                const histY = data.map(r => r.carbon_emissions_kg);
+                const histLabels = histX.map(i => `Trip ${i}`);
 
+                let datasets = [{
+                    label: 'kg CO₂ (History)',
+                    data: histY,
+                    borderColor: '#2D6A4F',
+                    backgroundColor: 'rgba(45,106,79,0.1)',
+                    fill: true,
+                    tension: 0.3
+                }];
+
+                let labels = histLabels;
+                let title = limit ? `Last ${limit} Trips` : 'All History';
+
+                // Prediction
+                if (predict && records.length >= 5) {
+                    const allX = records.map((_, i) => i + 1);
+                    const allY = records.map(r => r.carbon_emissions_kg);
+                    const reg = linearRegression(allX, allY);
+                    if (reg) {
+                        const futureCount = 5;
+                        const lastTrip = records.length;
+                        const futureX = Array.from({ length: futureCount }, (_, i) => lastTrip + i + 1);
+                        const futureY = futureX.map(x => Math.max(0, reg.intercept + reg.slope * x));
+
+                        // Extend labels
+                        labels = [...histLabels, ...futureX.map(x => `Trip ${x} (Pred.)`)];
+                        title += ' + 5-Trip Forecast';
+
+                        // History: pad with nulls
+                        datasets[0].data = [...histY, ...Array(futureCount).fill(null)];
+
+                        // Prediction line
+                        datasets.push({
+                            label: 'Predicted CO₂',
+                            data: [...Array(histY.length).fill(null), ...futureY],
+                            borderColor: '#74C69D',
+                            backgroundColor: 'transparent',
+                            borderDash: [6, 6],
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#74C69D'
+                        });
+                    }
+                }
+
+                // Destroy old chart
                 if (chartInstance) chartInstance.destroy();
 
                 const ctx = document.getElementById('emissionsChart').getContext('2d');
                 chartInstance = new Chart(ctx, {
                     type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'kg CO₂',
-                            data: values,
-                            borderColor: 'rgba(45,106,79,1)',
-                            backgroundColor: 'rgba(45,106,79,0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }]
-                    },
+                    data: { labels, datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
+                            title: { display: true, text: title, font: { size: 16 } },
                             legend: { position: 'top' },
-                            tooltip: { mode: 'index', intersect: false },
-                            title: {
-                                display: true,
-                                text: limit ? 'Last 10 Trips' : 'All History'
-                            }
+                            tooltip: { mode: 'index', intersect: false }
                         },
                         scales: {
                             y: { beginAtZero: true, title: { display: true, text: 'kg CO₂' } },
@@ -743,28 +944,52 @@
                         }
                     }
                 });
+
             } catch (e) {
                 console.error('Failed to load history:', e);
-                alert('Could not load history – check server logs.');
+                alert('Could not load history. Check console.');
             }
         }
 
-        // Toggle buttons
+        // Button handlers
         document.getElementById('btn-all').onclick = () => {
-            document.getElementById('btn-all').classList.replace('btn-secondary','btn-primary');
-            document.getElementById('btn-last10').classList.replace('btn-primary','btn-secondary');
-            loadHistory();
-        };
-        document.getElementById('btn-last10').onclick = () => {
-            document.getElementById('btn-last10').classList.replace('btn-secondary','btn-primary');
-            document.getElementById('btn-all').classList.replace('btn-primary','btn-secondary');
-            loadHistory(10);
+            currentLimit = null;
+            updateButtonClasses('btn-all');
+            loadHistory(currentLimit, showPrediction);
         };
 
-        // Auto-load last 10 on page load
+        document.getElementById('btn-last10').onclick = () => {
+            currentLimit = 10;
+            updateButtonClasses('btn-last10');
+            loadHistory(currentLimit, showPrediction);
+        };
+
+        document.getElementById('btn-prediction').onclick = () => {
+            showPrediction = !showPrediction;
+            const btn = document.getElementById('btn-prediction');
+            btn.textContent = showPrediction ? 'Hide Prediction' : 'Show Prediction';
+            btn.classList.toggle('btn-primary', showPrediction);
+            btn.classList.toggle('btn-secondary', !showPrediction);
+            loadHistory(currentLimit, showPrediction);
+        };
+
+    function updateButtonClasses(activeId) {
+        // All three buttons
+        ['btn-all', 'btn-last10', 'btn-prediction'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (!btn) return; // safety
+
+            const isActive = id === activeId;
+            btn.classList.toggle('btn-primary', isActive);
+            btn.classList.toggle('btn-secondary', !isActive);
+        });
+    }
+
+        // Initial load
         window.addEventListener('load', () => {
-            document.getElementById('btn-last10').click();
+            updateButtonClasses('btn-last10'); // default
+            loadHistory(currentLimit, showPrediction);
         });
     </script>
-</body>
-</html>
+    </body>
+    </html>
