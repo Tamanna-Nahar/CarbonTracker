@@ -16,6 +16,29 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
+app = Flask(__name__, static_folder='static')
+CORS(app)
+
+ELECTRICITY_HISTORY_PATH = os.path.join(app.static_folder, 'electricity_history.json')
+def _load_electricity_history():
+    if not os.path.exists(ELECTRICITY_HISTORY_PATH):
+        return []
+    history = []
+    try:
+        with open(ELECTRICITY_HISTORY_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    history.append(json.loads(line))
+    except Exception as e:
+        logger.error(f"Failed to read electricity history: {e}")
+    return history
+
+def _append_electricity_history(entry):
+    os.makedirs(app.static_folder, exist_ok=True)
+    with open(ELECTRICITY_HISTORY_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
 def _load_device_history():
     if not os.path.exists(DEVICE_HISTORY_PATH):
         return []
@@ -55,8 +78,47 @@ def _load_device_history():
 def _ensure_static_folder():
     os.makedirs(app.static_folder, exist_ok=True)
 
-app = Flask(__name__, static_folder='static')
-CORS(app)
+
+
+import cv2, numpy as np, easyocr, re, os, tempfile
+
+def process_electricity_bill(image_path):
+    x,y,w,h = 730,330,118,50                 # crop coordinates
+    carbon_intensity = 0.82                  # kg CO₂/kWh
+
+    def calc_bill(u):
+        fixed = 20
+        slabs = [(200,3.0),(200,4.5),(400,6.5),(400,7.0),(float('inf'),8.0)]
+        total,rem = fixed,u
+        for sz,rate in slabs:
+            if rem<=0: break
+            take = min(rem,sz) if sz!=float('inf') else rem
+            total += take*rate; rem-=take
+        return round(total,2)
+
+    img = cv2.imread(image_path)
+    if img is None: raise FileNotFoundError("Cannot read image")
+    crop = img[y:y+h, x:x+w]
+    if crop.size==0: raise ValueError("Crop empty")
+    tight = crop[int(crop.shape[0]*0.6):,:]
+    kernel = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
+    tight = cv2.filter2D(tight,-1,kernel)
+    tight = cv2.resize(tight,None,fx=4,fy=4,interpolation=cv2.INTER_LINEAR)
+
+    reader = easyocr.Reader(['en'], gpu=False)
+    txt = " ".join([t for _,t,_ in reader.readtext(tight)])
+    cleaned = txt.replace('O','0').replace('o','0').replace('l','1').replace('I','1').replace('g','9')
+    m = re.search(r'\d+(\.\d+)?', cleaned)
+
+    if m:
+        units = float(m.group(0))
+        return {"success":True, "units":units,
+                "bill_amount":calc_bill(units),
+                "co2_emissions":round(units*carbon_intensity,2)}
+    else:
+        return {"success":False, "error":"units_not_detected",
+                "message":"Units not found - please enter manually."}
+
 
 # === DEVICE EMISSIONS HISTORY ===
 DEVICE_HISTORY_PATH = os.path.join(app.static_folder, 'device_emissions_history.json')
@@ -245,30 +307,114 @@ def calculate_transport_emissions_endpoint():
     
 @app.route('/transport/history')
 def transport_history():
-    """
-    Return a JSON array with every entry that was appended to
-    static/transport_emissions.json by calculate_transport_emissions().
-    """
     json_path = os.path.join(app.static_folder, 'transport_emissions.json')
 
     if not os.path.exists(json_path):
-        return jsonify([])                     # file not created yet → empty list
+        return jsonify([])
 
     history = []
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
-            for line in f:
+            for line_num, line in enumerate(f, 1):
                 line = line.strip()
-                if line:                       # skip empty lines
-                    # each line = "[{...}]"  → we stored a list with one dict
-                    record = json.loads(line)[0]
-                    history.append(record)
+                if not line:
+                    continue
+                try:
+                    record = json.loads(line)
+                    if isinstance(record, list) and len(record) > 0:
+                        history.append(record[0])
+                    else:
+                        logger.warning(f"Invalid record format at line {line_num}: {line}")
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON error at line {line_num}: {e} | Line: {line}")
+                    continue  # Skip bad line
     except Exception as e:
-        logger.error(f"Failed to read transport history: {e}")
-        return jsonify([])
+        logger.error(f"Failed to read transport history file: {e}")
 
     return jsonify(history)
+@app.route('/electricity')
+def serve_electricity_page():
+    return send_from_directory('static', 'bill.html')
 
+@app.route('/electricity/upload', methods=['POST'])
+def upload_electricity_bill():
+    try:
+        if 'image' not in request.files:
+            return jsonify({"error": "No image"}), 400
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({"error": "No file"}), 400
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
+            file.save(tmp.name)
+            path = tmp.name
+
+        result = process_electricity_bill(path)
+        os.unlink(path)
+
+        # === SAVE TO HISTORY IF SUCCESS ===
+        if result.get("success"):
+            entry = {
+                "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+                "units": result["units"],
+                "bill_amount": result["bill_amount"],
+                "co2_emissions": result["co2_emissions"]
+            }
+            _append_electricity_history(entry)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Electricity OCR error: {e}")
+        return jsonify({"error": str(e)}), 500
+# === ELECTRICITY HISTORY FILE ===
+
+@app.route('/electricity/save_manual', methods=['POST'])
+def save_manual_bill():
+    try:
+        data = request.get_json()
+        units = float(data.get('units', 0))
+        date = data.get('date') or datetime.datetime.now().strftime("%Y-%m-%d")
+
+        # === Delhi Slab Calculation ===
+        def calc_bill(u):
+            fixed = 20
+            slabs = [(200,3.0),(200,4.5),(400,6.5),(400,7.0),(float('inf'),8.0)]
+            total, rem = fixed, u
+            for sz, rate in slabs:
+                if rem <= 0: break
+                take = rem if sz == float('inf') else min(rem, sz)
+                total += take * rate
+                rem -= take
+            return round(total, 2)
+
+        bill = calc_bill(units)
+        co2 = round(units * 0.82, 2)
+
+        # === SAVE TO HISTORY ===
+        entry = {
+            "date": date,
+            "units": units,
+            "bill_amount": bill,
+            "co2_emissions": co2
+        }
+        _append_electricity_history(entry)
+
+        return jsonify({
+            "success": True,
+            "units": units,
+            "bill_amount": bill,
+            "co2_emissions": co2
+        })
+
+    except Exception as e:
+        logger.error(f"Manual save error: {e}")
+        return jsonify({"error": str(e)}), 500
+@app.route('/electricity/history')
+def electricity_history():
+    history = _load_electricity_history()
+    history.sort(key=lambda x: x["date"], reverse=True)
+    return jsonify(history)
 
 @app.errorhandler(Exception)
 def handle_exception(e):

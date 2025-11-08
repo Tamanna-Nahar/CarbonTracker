@@ -211,13 +211,53 @@
             padding: 2rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
+        .chart-controls .btn-primary {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            border-radius: 30px;
+        }
+        .chart-controls .btn-primary.active {
+            background-color: var(--medium-green);
+            box-shadow: 0 0 10px rgba(64, 145, 108, 0.4);
+        }
 
-        footer {
+footer {
             background-color: var(--dark-green);
             color: var(--text-light);
             padding: 4rem 0 2rem;
         }
 
+        .chart-controls {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .chart-controls .btn-primary {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chart-controls .btn-primary:hover {
+            background-color: var(--medium-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .chart-controls .btn-primary.active {
+            background-color: var(--medium-green);
+            box-shadow: 0 0 12px rgba(64, 145, 108, 0.5);
+            transform: translateY(-1px);
+        }
         .footer-content {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -314,82 +354,341 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
+        .chart-controls {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .chart-controls .btn-primary {
+            background-color: var(--dark-green);
+            color: var(--text-light);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chart-controls .btn-primary:hover {
+            background-color: var(--medium-green);
+            transform: translateY(-2px);
+        }
+
+        .chart-controls .btn-primary.active {
+            background-color: var(--medium-green);
+            box-shadow: 0 0 10px rgba(64, 145, 108, 0.4);
+        }
+
+        .recommendations h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .recommendation-item {
+            background-color: var(--very-light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .recommendation-icon {
+            font-size: 2rem;
+            color: var(--medium-green);
+        }
+
+        .recommendation-text {
+            flex: 1;
+        }
+
+        .recommendation-text h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .report-section {
+            background-color: var(--cream);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .report-section h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .report-controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-controls .btn-primary {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            border-radius: 30px;
+        }
+
+        .report-controls .btn-primary.active {
+            background-color: var(--medium-green);
+            box-shadow: 0 0 10px rgba(64, 145, 108, 0.4);
+        }
+
+        .report-category {
+            margin-bottom: 2rem;
+        }
+
+        .report-category h3 {
+            font-size: 1.4rem;
+            color: var(--dark-green);
+            margin-bottom: 1rem;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .report-table th {
+            background-color: var(--light-green);
+            color: var(--text-dark);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .report-table td {
+            background-color: var(--very-light-green);
+            padding: 1rem;
+            border-top: 1px solid var(--light-green);
+        }
+
+        .tips-section {
+            background-color: var(--cream);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .tips-section h2 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .tip-item {
+            background-color: var(--very-light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .tip-icon {
+            font-size: 2rem;
+            color: var(--medium-green);
+        }
+
+        .tip-text {
+            flex: 1;
+        }
+
+        .tip-text h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-btn {
+            background-color: var(--accent);
+            color: var(--dark-green);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .download-btn:hover {
+            background-color: var(--light-green);
+            transform: translateY(-2px);
+        }
+
+        .download-btn i {
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <nav class="container">
-            <div class="logo">
-                <span class="leaf-icon">🍃</span>
-                <span>CarboTracker</span>
-            </div>
+
+<header>
+    <div class="container">
+        <nav>
+            <div class="logo"><span class="leaf-icon">🍃</span> CarboTracker</div>
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href=""index.html#how-it-works">How It Works</a>
-                <a href=/dashboard>Dashboard</a>
+                <a href=/electricity>Dashboard</a>
                 <a href="#">About</a>
             </div>
-            <button class="btn-login">Sign Out</button>
+            <button class="btn-login">Sign In</button>
         </nav>
-    </header>
+    </div>
+</header>
 
-    <!-- Dashboard Hero -->
-    <section class="dashboard-hero">
-        <div class="container">
-            <h1>Your Carbon Footprint Dashboard</h1>
-            <p>Track and reduce your environmental impact with real-time insights from receipts, images, device usage, and more.</p>
-        </div>
-    </section>
+<section class="dashboard-hero">
+    <div class="container">
+        <h1>Welcome to Your Dashboard</h1>
+        <p>Track your carbon footprint and get personalized recommendations to live more sustainably.</p>
+    </div>
+</section>
 
-    <section class="dashboard-content container">
+<section class="dashboard-content">
+    <div class="container">
         <div class="feature-cards">
-            <div class="feature-card" data-page="/ocr">
-                <div class="feature-icon">🧾</div>
-                <div class="feature-content">
-                    <h3>Receipt Scanner</h3>
-                    <p>Upload shopping receipts to calculate their carbon footprint using advanced OCR technology.</p>
-                    <p id="receiptStatus" class="status-text mt-2">No receipt uploaded yet.</p>
-                </div>
-            </div>
-
-
             <div class="feature-card" data-page="/device">
                 <div class="feature-icon">💻</div>
                 <div class="feature-content">
-                    <h3>Device Usage Emissions</h3>
-                    <p>Track carbon emissions from your device usage (e.g., laptop, phone).</p>
+                    <h3>Device Analyzer</h3>
+                    <p>Analyze your device usage and estimate its carbon footprint.</p>
                     <p id="deviceStatus" class="status-text mt-2">No device data tracked yet.</p>
                 </div>
             </div>
-
             <div class="feature-card" data-page="/transport">
                 <div class="feature-icon">🚌</div>
                 <div class="feature-content">
-                    <h3>Transportation Emissions</h3>
-                    <p>Log activities like transportation to track their carbon impact.</p>
+                    <h3>Transport Calculator</h3>
+                    <p>Calculate emissions from your daily commute and travel.</p>
                     <p id="activityStatus" class="status-text mt-2">No activities logged yet.</p>
                 </div>
             </div>
+            <div class="feature-card" data-page="/electricity">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-content">
+                    <h3>Electricity Bill</h3>
+                    <p>Scan your bill to track units, cost, and CO₂ emissions.</p>
+                    <p id="electricityStatus" class="status-text mt-2">No bill scanned yet.</p>
+                    <p id="electricityAvg" class="status-text mt-2" style="font-size:0.85rem; color:#555;"></p>
+                </div>
+            </div>
         </div>
-        
 
         <div class="chart-container">
-            <h2 class="text-2xl font-semibold mb-4" style="color: var(--dark-green);">Carbon Footprint Overview</h2>
-            <canvas id="carbonChart" style="max-height: 400px;"></canvas>
-            <p class="mt-4">Track your emissions over time and see the impact of your sustainable choices.</p>
+            <h2 style="font-size: 1.8rem; color: var(--dark-green); margin-bottom: 1rem;">Carbon Footprint Overview</h2>
+            <div class="chart-controls">
+                <button id="btn10Days" class="btn-primary active">Last 10 Days</button>
+                <button id="btnAll" class="btn-primary">All Time</button>
+            </div>
+            <canvas id="carbonChart"></canvas>
         </div>
 
-        <div class="recommendations">
-            <h2 class="text-2xl font-semibold mb-4" style="color: var(--dark-green);">Personalized Recommendations</h2>
-            <ul class="list-disc pl-6">
-                <li>Switch to eco-friendly brands for grocery shopping.</li>
-                <li>Reduce device usage by 1 hour daily to save 0.5 kg CO₂/week.</li>
-                <li>Use public transport to lower your transportation emissions.</li>
-            </ul>
-            <button class="btn-primary mt-4">View More Suggestions</button>
+        <!-- Detailed Report Section -->
+        <div class="report-section" id="report-section">
+            <h2>Detailed Report</h2>
+            <div class="report-controls">
+                <button id="reportDaily" class="btn-primary active">Daily</button>
+                <button id="reportMonthly" class="btn-primary">Monthly</button>
+            </div>
+            <div class="report-category" id="device-report">
+                <h3>Devices</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Date/Month</th>
+                            <th>Energy (kWh)</th>
+                            <th>Emissions (kg CO₂)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-table-body"></tbody>
+                </table>
+            </div>
+            <div class="report-category" id="transport-report">
+                <h3>Transport</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Date/Month</th>
+                            <th>Distance (km)</th>
+                            <th>Emissions (kg CO₂)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transport-table-body"></tbody>
+                </table>
+            </div>
+            <div class="report-category" id="electricity-report">
+                <h3>Electricity</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Date/Month</th>
+                            <th>Units (kWh)</th>
+                            <th>Bill (₹)</th>
+                            <th>Emissions (kg CO₂)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="electricity-table-body"></tbody>
+                </table>
+            </div>
+            <button class="download-btn" id="download-report"><i class="fas fa-download"></i> Download Report (CSV)</button>
         </div>
-    </section>
+
+
+
+        <div class="recommendations">
+            <h2>Recommendations to Reduce Your Footprint</h2>
+            <div class="recommendation-item">
+                <div class="recommendation-icon">🌱</div>
+                <div class="recommendation-text">
+                    <h3>Switch to Renewable Energy</h3>
+                    <p>Consider installing solar panels or switching to a green energy provider to reduce your electricity emissions.</p>
+                </div>
+            </div>
+            <div class="recommendation-item">
+                <div class="recommendation-icon">🚲</div>
+                <div class="recommendation-text">
+                    <h3>Use Public Transport</h3>
+                    <p>Opt for buses, trains, or biking for daily commutes to lower your transportation emissions.</p>
+                </div>
+            </div>
+            <div class="recommendation-item">
+                <div class="recommendation-icon">💡</div>
+                <div class="recommendation-text">
+                    <h3>Energy-Efficient Devices</h3>
+                    <p>Replace old appliances with energy-star rated ones and unplug devices when not in use.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
     <footer>
         <div class="container footer-content">
@@ -439,97 +738,304 @@
         </div>
     </footer>
 
-    <script>
-        const ctx = document.getElementById('carbonChart').getContext('2d');
-        const carbonChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                datasets: [{
-                    label: 'Carbon Footprint (kg CO₂)',
-                    data: [10, 8, 12, 7, 9],
-                    borderColor: '#2D6A4F',
-                    backgroundColor: 'rgba(45, 106, 79, 0.2)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'CO₂ Emissions (kg)',
-                            color: '#1B4332'
-                        },
-                        ticks: {
-                            color: '#1B4332'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Month',
-                            color: '#1B4332'
-                        },
-                        ticks: {
-                            color: '#1B4332'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#1B4332'
-                        }
-                    }
-                }
-            }
-        });
+<script>
+    const TODAY = '2025-11-08';
+    let allData = []; 
+    let allTransport = []; 
+    let allDevice = [];
+    let allElectricity = [];
+    let currentReportMode = 'daily';
 
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const page = this.getAttribute('data-page');
-                if (page) {
-                    window.location.href = page;
+    const ctx = document.getElementById('carbonChart').getContext('2d');
+    const carbonChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{
+            label: 'Total CO₂ (kg)',
+            data: [],
+            borderColor: '#2D6A4F',
+            backgroundColor: 'rgba(45,106,79,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#2D6A4F',
+            pointRadius: 4
+        }]},
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'CO₂ (kg)' } },
+                x: { title: { display: true, text: 'Date' } }
+            },
+            plugins: { tooltip: { mode: 'index', intersect: false } }
+        }
+    });
+
+    // Card navigation
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const page = card.getAttribute('data-page');
+            if (page) location.href = page;
+        });
+    });
+
+    // Chart Buttons
+    document.getElementById('btn10Days').onclick = () => updateChartView('10days');
+    document.getElementById('btnAll').onclick = () => updateChartView('all');
+
+    // Report Buttons
+    document.getElementById('reportDaily').onclick = () => {
+        currentReportMode = 'daily';
+        updateReport('daily');
+        setActiveReportButton('reportDaily');
+    };
+    document.getElementById('reportMonthly').onclick = () => {
+        currentReportMode = 'monthly';
+        updateReport('monthly');
+        setActiveReportButton('reportMonthly');
+    };
+
+    function setActiveButton(id) {
+        document.querySelectorAll('.chart-controls button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function setActiveReportButton(id) {
+        document.querySelectorAll('.report-controls button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    async function loadAllData() {
+        try {
+            const [devResp, trResp, eleResp] = await Promise.all([
+                fetch('/device/history').catch(() => ({ json: () => [] })),
+                fetch('/transport/history').catch(() => ({ json: () => [] })),
+                fetch('/electricity/history').catch(() => ({ json: () => [] }))
+            ]);
+
+            allDevice = (await devResp.json()) || [];
+            allTransport = (await trResp.json()) || [];
+            allElectricity = (await eleResp.json()) || [];
+
+            const deviceMap = {}, transportMap = {}, electricityMap = {};
+
+            // === Device ===
+            allDevice.forEach(d => {
+                if (!d || d.device === 'All Devices') return;
+                const date = d.timestamp?.slice(0, 10);
+                if (date) {
+                    deviceMap[date] = (deviceMap[date] || 0) + (d.emissions_kg || 0);
                 }
             });
-        });
 
-        async function fetchEmissionsData() {
-            try {
-                const response = await fetch('/api/emissions');
-                const data = await response.json();
-                if (data.emissions && data.emissions.length > 0) {
-                    carbonChart.data.labels = data.emissions.map(e => e.date || 'Now');
-                    carbonChart.data.datasets[0].data = data.emissions.map(e => e.co2);
-                    carbonChart.update();
-
-                    const lastReceipt = data.emissions.find(e => e.type === 'receipt');
-                    if (lastReceipt) {
-                        document.getElementById('receiptStatus').textContent = `Last receipt: ${lastReceipt.co2} kg CO₂ emitted.`;
-                    }
-                    const lastImage = data.emissions.find(e => e.type === 'image');
-                    if (lastImage) {
-                        document.getElementById('imageStatus').textContent = `Last image: ${lastImage.co2} kg CO₂ emitted.`;
-                    }
-                    const lastDevice = data.emissions.find(e => e.type === 'device');
-                    if (lastDevice) {
-                        document.getElementById('deviceStatus').textContent = `Last device usage: ${lastDevice.co2} kg CO₂ emitted.`;
-                    }
-                    const lastActivity = data.emissions.find(e => e.type === 'activity');
-                    if (lastActivity) {
-                        document.getElementById('activityStatus').textContent = `Last activity: ${lastActivity.co2} kg CO₂ from ${lastActivity.activityType}.`;
-                    }
+            // === Transport ===
+            allTransport.forEach(t => {
+                if (!t) return;
+                const date = t.timestamp?.slice(0, 10);
+                if (date) {
+                    transportMap[date] = (transportMap[date] || 0) + (t.carbon_emissions_kg || 0);
                 }
-            } catch (error) {
-                console.error('Error fetching emissions data:', error);
-            }
+            });
+
+            // === Electricity ===
+            allElectricity.forEach(e => {
+                if (!e || !e.date) return;
+                const date = e.date;
+                electricityMap[date] = (electricityMap[date] || 0) + (e.co2_emissions || 0);
+            });
+
+            // === Combine & Sort Chronologically (Oldest → Newest) ===
+            const allDates = new Set([
+                ...Object.keys(deviceMap),
+                ...Object.keys(transportMap),
+                ...Object.keys(electricityMap)
+            ]);
+
+            allData = Array.from(allDates)
+                .sort((a, b) => a.localeCompare(b)) // Oldest first → Newest last
+                .map(date => ({
+                    date,
+                    device: deviceMap[date] || 0,
+                    transport: transportMap[date] || 0,
+                    electricity: electricityMap[date] || 0,
+                    total: (deviceMap[date] || 0) + (transportMap[date] || 0) + (electricityMap[date] || 0)
+                }));
+
+            updateDashboardToday();
+            updateChartView('10days');
+            updateReport('daily');
+            generateTips();
+        } catch (err) {
+            console.error("Load error:", err);
+        }
+    }
+
+    function updateDashboardToday() {
+        const todayData = allData.find(d => d.date === TODAY) || { device: 0, transport: 0, electricity: 0 };
+
+        // Device
+        document.getElementById('deviceStatus').textContent = 
+            todayData.device > 0 
+                ? `Total device usage today: ${todayData.device.toFixed(3)} kg CO₂.` 
+                : 'No device data tracked yet.';
+
+        // Transport
+        const todayTransport = allTransport.filter(t => t?.timestamp?.startsWith(TODAY));
+        if (todayTransport.length > 0) {
+            const latest = todayTransport.sort((a,b) => (b.timestamp || '').localeCompare(a.timestamp || ''))[0];
+            document.getElementById('activityStatus').innerHTML = 
+                `<strong>Total Transport Today: ${todayData.transport.toFixed(2)} kg CO₂</strong><br>` +
+                `Latest: ${(latest.carbon_emissions_kg || 0).toFixed(2)} kg from <em>${(latest.transport_mode || 'Unknown').replace('_', ' ')}</em> (${latest.distance_km || 0} km)`;
+        } else {
+            document.getElementById('activityStatus').textContent = 'No activities logged yet.';
         }
 
-        window.addEventListener('load', fetchEmissionsData);
-    </script>
+        // Electricity
+        if (todayData.electricity > 0) {
+            document.getElementById('electricityStatus').innerHTML = 
+                `<strong>Latest Bill:</strong> ${todayData.electricity.toFixed(2)} kg CO₂`;
+            const days = new Set(allElectricity.map(e => e?.date).filter(Boolean)).size;
+            const totalCO2 = allElectricity.reduce((sum, e) => sum + (e?.co2_emissions || 0), 0);
+            const avgDaily = days > 0 ? (totalCO2 / days).toFixed(2) : '0';
+            document.getElementById('electricityAvg').textContent = 
+                `Avg daily: ${avgDaily} kg CO₂ (${days} day${days>1?'s':''})`;
+        } else {
+            document.getElementById('electricityStatus').textContent = 'No bill scanned yet.';
+            document.getElementById('electricityAvg').textContent = '';
+        }
+    }
+
+    function updateChartView(mode) {
+        setActiveButton(mode === '10days' ? 'btn10Days' : 'btnAll');
+        let viewData = allData;
+
+        if (mode === '10days') {
+            const cutoff = new Date(TODAY);
+            cutoff.setDate(cutoff.getDate() - 9);
+            const cutoffStr = cutoff.toISOString().slice(0,10);
+            viewData = allData.filter(d => d.date >= cutoffStr);
+        }
+
+        carbonChart.data.labels = viewData.map(d => d.date === TODAY ? 'Today' : d.date.slice(5));
+        carbonChart.data.datasets[0].data = viewData.map(d => d.total);
+        carbonChart.update();
+    }
+
+    function updateReport(mode) {
+        updateDeviceReport(mode);
+        updateTransportReport(mode);
+        updateElectricityReport(mode);
+    }
+
+    function updateDeviceReport(mode) {
+        const body = document.getElementById('device-table-body');
+        body.innerHTML = '';
+        const agg = {};
+
+        allDevice.forEach(d => {
+            if (!d || d.device === 'All Devices') return;
+            const key = mode === 'daily' ? d.timestamp?.slice(0,10) : d.timestamp?.slice(0,7);
+            if (!key) return;
+            if (!agg[key]) agg[key] = { energy: 0, emissions: 0 };
+            agg[key].energy += d.energy_kwh || 0;
+            agg[key].emissions += d.emissions_kg || 0;
+        });
+
+        Object.keys(agg).sort((a,b) => b.localeCompare(a)).forEach(key => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${key}</td><td>${agg[key].energy.toFixed(2)}</td><td>${agg[key].emissions.toFixed(2)}</td>`;
+            body.appendChild(tr);
+        });
+    }
+
+    function updateTransportReport(mode) {
+        const body = document.getElementById('transport-table-body');
+        body.innerHTML = '';
+        const agg = {};
+
+        allTransport.forEach(t => {
+            if (!t) return;
+            const key = mode === 'daily' ? t.timestamp?.slice(0,10) : t.timestamp?.slice(0,7);
+            if (!key) return;
+            if (!agg[key]) agg[key] = { dist: 0, co2: 0 };
+            agg[key].dist += t.distance_km || 0;
+            agg[key].co2 += t.carbon_emissions_kg || 0;
+        });
+
+        Object.keys(agg).sort((a,b) => b.localeCompare(a)).forEach(key => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${key}</td><td>${agg[key].dist.toFixed(2)}</td><td>${agg[key].co2.toFixed(2)}</td>`;
+            body.appendChild(tr);
+        });
+    }
+
+    function updateElectricityReport(mode) {
+        const body = document.getElementById('electricity-table-body');
+        body.innerHTML = '';
+        const agg = {};
+
+        allElectricity.forEach(e => {
+            if (!e || !e.date) return;
+            const key = mode === 'daily' ? e.date : e.date.slice(0,7);
+            if (!key) return;
+            if (!agg[key]) agg[key] = { units: 0, bill: 0, co2: 0 };
+            agg[key].units += e.units || 0;
+            agg[key].bill += e.bill_amount || 0;
+            agg[key].co2 += e.co2_emissions || 0;
+        });
+
+        Object.keys(agg).sort((a,b) => b.localeCompare(a)).forEach(key => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${key}</td><td>${agg[key].units.toFixed(2)}</td><td>₹${agg[key].bill.toFixed(2)}</td><td>${agg[key].co2.toFixed(2)}</td>`;
+            body.appendChild(tr);
+        });
+    }
+
+    function generateTips() {
+        const total = allData.reduce((s, d) => s + d.total, 0) || 1;
+        const dev = allData.reduce((s, d) => s + d.device, 0);
+        const trn = allData.reduce((s, d) => s + d.transport, 0);
+        const ele = allData.reduce((s, d) => s + d.electricity, 0);
+
+        const tips = [];
+        if (dev / total > 0.3) tips.push({ icon: 'Unplug', title: 'Cut Device Power', text: 'Unplug chargers & idle devices. Enable sleep mode.' });
+        if (trn / total > 0.3) tips.push({ icon: 'Bike', title: 'Go Green on Wheels', text: 'Walk, cycle, or use public transport for short trips.' });
+        if (ele / total > 0.3) tips.push({ icon: 'Light', title: 'Save Electricity', text: 'Switch to LEDs. Turn off lights when not in use.' });
+        if (tips.length === 0) tips.push({ icon: 'Leaf', title: 'Great Job!', text: 'You’re doing well. Keep tracking!' });
+
+        const list = document.getElementById('tips-list');
+        list.innerHTML = '';
+        tips.forEach(t => {
+            list.innerHTML += `
+                <div class="tip-item">
+                    <div class="tip-icon">${t.icon}</div>
+                    <div class="tip-text"><h3>${t.title}</h3><p>${t.text}</p></div>
+                </div>`;
+        });
+    }
+
+    // Download CSV
+    document.getElementById('download-report').onclick = () => {
+        let csv = 'Category,Period,Details,CO₂ (kg)\n';
+        const add = (cat, rows) => {
+            csv += `${cat}\n`;
+            for (let r of rows) {
+                const cells = r.cells;
+                csv += `,${cells[0].textContent},${cells[1].textContent},${cells[2].textContent}\n`;
+            }
+        };
+        add('Devices', document.getElementById('device-table-body').rows);
+        add('Transport', document.getElementById('transport-table-body').rows);
+        add('Electricity', document.getElementById('electricity-table-body').rows);
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: `carbotracker_${currentReportMode}.csv`
+        });
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+
+    window.addEventListener('load', loadAllData);
+</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 regional_intensities = {
     'global': 475,
-    'india': 790,
+    'india': 708,
     'usa': 400,
     'eu': 250,
     'china': 550,

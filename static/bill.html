@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarboTracker | Electricity Bill Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root{
+            --dark-green:#2D6A4F;--medium-green:#40916C;--light-green:#95D5B2;
+            --very-light-green:#D8F3DC;--cream:#FFF8E8;--dark-cream:#F0E6D2;
+            --text-dark:#1B4332;--text-light:#FFF8E8;--accent:#74C69D;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+        body{background:var(--cream);color:var(--text-dark);line-height:1.6;}
+        .container{max-width:1200px;margin:0 auto;padding:0 20px;}
+        header{background:var(--dark-green);padding:1rem 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.1);}
+        nav{display:flex;justify-content:space-between;align-items:center;}
+        .logo{display:flex;align-items:center;gap:12px;color:var(--text-light);font-size:1.5rem;font-weight:700;}
+        .leaf{font-size:1.8rem;}
+        .nav-links a{color:var(--text-light);text-decoration:none;margin:0 1rem;font-weight:500;}
+        .btn-login{background:var(--accent);color:var(--dark-green);border:none;padding:.6rem 1.5rem;border-radius:30px;font-weight:600;cursor:pointer;transition:.3s;}
+        .btn-login:hover{background:var(--light-green);transform:translateY(-2px);}
+        .page-header{background:var(--very-light-green);padding:3rem 0;text-align:center;}
+        .page-header h1{font-size:2.5rem;color:var(--dark-green);margin-bottom:1rem;}
+        .page-header p{max-width:700px;margin:0 auto;font-size:1.1rem;}
+        .ocr-section{padding:4rem 0;}
+        .upload-area{background:var(--dark-cream);border-radius:15px;padding:2.5rem;box-shadow:0 5px 25px rgba(0,0,0,.05);}
+        .drag-area{border:2px dashed var(--medium-green);border-radius:10px;padding:2.5rem;cursor:pointer;transition:.3s;background:var(--very-light-green);text-align:center;}
+        .drag-area:hover{border-color:var(--dark-green);background:var(--light-green);}
+        .drag-area h3{font-size:1.4rem;margin:1rem 0 .5rem;}
+        #file-input{display:none;}
+        .manual-input{display:none;margin-top:2rem;}
+        .manual-input input{padding:.8rem 1.2rem;font-size:1.1rem;width:180px;border:2px solid var(--medium-green);border-radius:8px;text-align:center;}
+        .btn-primary{background:var(--dark-green);color:var(--text-light);border:none;padding:.9rem 2rem;border-radius:30px;font-weight:600;cursor:pointer;transition:.3s;display:inline-flex;align-items:center;gap:.5rem;justify-content:center;width:100%;margin-top:1rem;}
+        .btn-primary:hover{background:var(--medium-green);transform:translateY(-2px);}
+        .btn-secondary{background:transparent;color:var(--dark-green);border:2px solid var(--medium-green);padding:.8rem 1.8rem;border-radius:30px;font-weight:600;cursor:pointer;transition:.3s;width:100%;margin-top:.5rem;}
+        .btn-secondary:hover{background:var(--very-light-green);}
+        .processing-indicator{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:300px;}
+        .loader{border:5px solid var(--very-light-green);border-top:5px solid var(--dark-green);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;margin-bottom:1.5rem;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .results-content{display:none;background:var(--very-light-green);border-radius:8px;padding:2rem;margin-top:2rem;}
+        .results-content.active{display:block;}
+        .data-group{margin-bottom:1.5rem;}
+        .data-group h3{font-size:1.2rem;color:var(--dark-green);margin-bottom:.8rem;border-bottom:1px solid var(--light-green);padding-bottom:.5rem;}
+        .data-item{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.95rem;}
+        .data-label{font-weight:600;}
+        .carbon-footprint{background:var(--dark-green);color:var(--text-light);border-radius:8px;padding:1.5rem;text-align:center;margin-top:1.5rem;}
+        .carbon-footprint h3{font-size:1.3rem;margin-bottom:1rem;}
+        .carbon-value{font-size:2.5rem;font-weight:700;margin-bottom:.5rem;}
+        .carbon-unit{font-size:.9rem;opacity:.8;}
+        .reupload{margin-top:1rem;display:none;}
+        .manual-input {
+    display: none;
+    margin-top: 2rem;
+    animation: fadeIn 0.4s ease-in;
+}
+.chart-controls button {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 30px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <nav>
+            <div class="logo"><span class="leaf-icon">🍃</span> CarboTracker</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href=""index.html#how-it-works">How It Works</a>
+                <a href=/dashboard>Dashboard</a>
+                <a href="#">About</a>
+            </div>
+            <button class="btn-login">Sign In</button>
+        </nav>
+    </div>
+</header>
+
+<section class="page-header">
+    <div class="container">
+        <h1>Electricity Bill Scanner</h1>
+        <p>Upload your bill image -  we'll read the units, calculate the Delhi-slab bill and show the CO₂ footprint.</p>
+    </div>
+</section>
+
+<section class="ocr-section">
+    <div class="container">
+        <div class="upload-area">
+            <h2 style="font-size:1.8rem;color:var(--dark-green);margin-bottom:1.5rem;">Upload Bill</h2>
+
+            <div class="drag-area" id="drop-zone">
+                <i style="font-size:3rem;color:var(--medium-green);">📄</i>
+                <h3>Drag & Drop Bill</h3>
+                <span>OR</span>
+                <button class="btn-primary" style="margin:15px auto;display:inline-block;width:auto;" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                <input type="file" id="file-input" accept="image/*">
+                <div class="file-types" style="font-size:.85rem;color:#666;margin-top:.5rem;">JPG, PNG</div>
+            </div>
+
+            <div class="manual-input" id="manual-input">
+                    <div style="text-align:center; padding:1.8rem; background:var(--very-light-green); border-radius:14px; box-shadow:0 5px 18px rgba(0,0,0,.1); max-width:380px; margin:0 auto;">
+                        <p style="margin:0 0 1.2rem; font-size:1.15rem; color:var(--dark-green); font-weight:600;">
+                            Units not detected
+                        </p>
+                        
+                        <div style="margin-bottom:1rem;">
+                            <input 
+                                type="number" 
+                                step="0.01" 
+                                id="manual-units" 
+                                placeholder="Units (e.g. 245.5)" 
+                                style="padding:0.9rem 1.2rem; font-size:1.1rem; width:100%; max-width:220px; border:2px solid var(--medium-green); border-radius:10px; text-align:center; background:white; color:var(--text-dark); outline:none; transition:.3s;"
+                                onfocus="this.style.border='2px solid var(--dark-green)'"
+                                onblur="this.style.border='2px solid var(--medium-green)'"
+                            >
+                        </div>
+
+                        <div style="margin-bottom:1.2rem;">
+                            <input 
+                                type="date" 
+                                id="manual-date" 
+                                style="padding:0.8rem 1rem; font-size:1rem; width:100%; max-width:220px; border:2px solid var(--medium-green); border-radius:10px; text-align:center; background:white; color:var(--text-dark);"
+                            >
+                        </div>
+
+                        <button class="btn-primary" id="submit-manual" style="width:auto; padding:0.8rem 2.2rem; font-size:1rem;">
+                            Save & Calculate
+                        </button>
+                    </div>
+                </div>
+
+            <div class="processing-indicator" id="processing">
+                <div class="loader"></div>
+                <p class="processing-text">Analyzing your bill…</p>
+            </div>
+
+            <div class="results-content" id="results">
+                <div class="data-group">
+                    <h3>Bill Summary</h3>
+                    <div class="data-item"><span class="data-label">Units Consumed</span><span class="data-value" id="units">-</span></div>
+                    <div class="data-item"><span class="data-label">Estimated Bill</span><span class="data-value" id="bill">-</span></div>
+                </div>
+
+                <div class="carbon-footprint">
+                    <h3>Carbon Footprint</h3>
+                    <div class="carbon-value" id="co2">-</div>
+                    <div class="carbon-unit">kg CO₂</div>
+                </div>
+
+                <!-- CO2 Trend Chart -->
+                <div class="chart-container" id="chart-section" style="margin-top:2rem; display:none;">
+                    <h3 style="color:var(--dark-green); margin-bottom:1rem; text-align:center;">CO₂ Emissions Trend</h3>
+                    <div class="chart-controls" style="display:flex; justify-content:center; gap:0.8rem; margin-bottom:1rem;">
+                        <button id="btnDaily" class="btn-primary active" style="flex:1; max-width:120px;">Daily</button>
+                        <button id="btnMonthly" class="btn-primary" style="flex:1; max-width:120px;">Monthly</button>
+                    </div>
+                    <canvas id="co2Chart" style="max-height:300px;"></canvas>
+                </div>
+
+                <!-- AI Prediction & Tips -->
+                <div id="ai-section" style="margin-top:2rem; display:none;">
+                    <div style="background:var(--very-light-green); padding:1.5rem; border-radius:12px; text-align:center;">
+                        <h3 style="color:var(--dark-green); margin-bottom:1rem;">AI Insights</h3>
+                        <p id="prediction" style="font-weight:600; color:#1a5d3a; margin-bottom:1rem;"></p>
+                        <div id="ai-tips" style="text-align:left; font-size:0.95rem; line-height:1.6;"></div>
+                    </div>
+                </div>
+
+                <button class="btn-secondary reupload" id="reupload">Upload Another Bill</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+const dropZone = document.getElementById('drop-zone'), fileInput = document.getElementById('file-input'),
+      processing = document.getElementById('processing'), results = document.getElementById('results'),
+      manual = document.getElementById('manual-input'), reupload = document.getElementById('reupload');
+
+// --- Drag & Drop ---
+['dragover','dragenter'].forEach(e=>dropZone.addEventListener(e,ev=>{ev.preventDefault();dropZone.style.background='var(--light-green)';}));
+['dragleave','drop'].forEach(e=>dropZone.addEventListener(e,ev=>{ev.preventDefault();dropZone.style.background='var(--very-light-green)';}));
+dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&handleFile(f);});
+fileInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) handleFile(this.files[0]);
+});
+
+// --- Default date for manual input ---
+document.getElementById('manual-date').valueAsDate = new Date();
+
+// --- OCR Upload ---
+function handleFile(file){
+    if(!file.type.startsWith('image/')) return alert('Please upload an image');
+    dropZone.style.display='none'; processing.style.display='flex';
+    const fd = new FormData(); fd.append('image',file);
+    fetch('/electricity/upload',{method:'POST',body:fd})
+        .then(r=>r.json())
+        .then(data=>{
+            processing.style.display='none';
+            if(data.success){
+                showResult(data);
+                loadHistoryAndShow();
+            } else if(data.error==='units_not_detected'){
+                manual.style.display='block';
+                document.getElementById('submit-manual').onclick = () => {
+                    const u = parseFloat(document.getElementById('manual-units').value);
+                    const date = document.getElementById('manual-date').value || new Date().toISOString().split('T')[0];
+                    if(isNaN(u)||u<0) return alert('Enter valid units');
+                    manual.style.display='none'; processing.style.display='flex';
+                    saveManual(u, date);
+                };
+            } else { alert(data.message||'Error'); reset(); }
+        })
+        .catch(()=>{processing.style.display='none';alert('Network error');reset();});
+}
+
+// --- Manual Save ---
+function saveManual(units, date){
+    fetch('/electricity/save_manual', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({units, date})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        processing.style.display='none';
+        if(data.success){
+            showResult(data);
+            loadHistoryAndShow();
+        } else { alert('Save failed'); reset(); }
+    })
+    .catch(()=>{processing.style.display='none';alert('Network error');reset();});
+}
+
+// --- Show Result ---
+function showResult(d){
+    document.getElementById('units').innerText = `${d.units} kWh`;
+    document.getElementById('bill').innerText = `₹${d.bill_amount}`;
+    document.getElementById('co2').innerText = `${d.co2_emissions}`;
+    results.classList.add('active'); reupload.style.display='block';
+    loadHistoryAndShow();
+}
+
+// --- Reset UI ---
+function reset(){
+    dropZone.style.display='block'; processing.style.display='none';
+    results.classList.remove('active'); manual.style.display='none'; reupload.style.display='none';
+    fileInput.value=''; document.getElementById('manual-units').value='';
+    document.getElementById('chart-section').style.display='none';
+    document.getElementById('ai-section').style.display='none';
+}
+reupload.onclick = reset;
+
+let co2Chart = null;
+let historyData = [];
+
+async function loadHistoryAndShow(){
+    try {
+        const resp = await fetch('/electricity/history');
+        let data = await resp.json();
+        if (!Array.isArray(data)) data = [];
+
+        historyData = data.sort((a, b) => a.date.localeCompare(b.date));
+
+        if(historyData.length === 0) return;
+
+        document.getElementById('chart-section').style.display='block';
+        document.getElementById('ai-section').style.display='block';
+        updateCO2Chart('daily');
+        showAIPrediction();
+    } catch(e) {
+        console.error("History load failed:", e);
+    }
+}
+
+function updateCO2Chart(mode){
+    if (!historyData || !Array.isArray(historyData) || historyData.length === 0) return;
+
+    const ctx = document.getElementById('co2Chart').getContext('2d');
+    let labels = [], data = [];
+
+    // Filter valid entries
+    const valid = historyData.filter(d => d && d.date && typeof d.date === 'string' && typeof d.co2_emissions === 'number');
+
+    if (valid.length === 0) {
+        labels = ['No data'];
+        data = [0];
+    } else if (mode === 'daily') {
+        const sorted = [...valid].sort((a, b) => a.date.localeCompare(b.date));
+        labels = sorted.map(d => d.date.slice(5)); // MM-DD
+        data = sorted.map(d => d.co2_emissions);
+    } else {
+        const monthly = {};
+        valid.forEach(d => {
+            const m = d.date.slice(0, 7);
+            monthly[m] = (monthly[m] || 0) + d.co2_emissions;
+        });
+        const sorted = Object.keys(monthly).sort();
+        labels = sorted.map(m => m.slice(5));
+        data = sorted.map(m => monthly[m]);
+    }
+
+    if (co2Chart) co2Chart.destroy();
+    co2Chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'CO₂ (kg)',
+                data,
+                borderColor: '#2D6A4F',
+                backgroundColor: 'rgba(45,106,79,0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true },
+                x: { title: { display: true, text: mode === 'daily' ? 'Date' : 'Month' } }
+            }
+        }
+    });
+
+    // Update active button
+    document.querySelectorAll('#chart-section .chart-controls button').forEach(b => b.classList.remove('active'));
+    document.getElementById(mode === 'daily' ? 'btnDaily' : 'btnMonthly').classList.add('active');
+}
+
+function showAIPrediction(){
+    if(historyData.length<3){
+        document.getElementById('prediction').textContent='Need 3+ bills for prediction.';
+        return;
+    }
+    const recent = historyData.slice(-3).map(d=>d.co2_emissions ?? 0);
+    const avg = recent.reduce((a,b)=>a+b,0)/recent.length;
+    const trend = recent[2]-recent[0];
+    const next = avg + (trend*0.5);
+    document.getElementById('prediction').innerHTML = 
+        `Next month: <strong>${next.toFixed(1)} kg CO₂</strong> ${trend>0?'Up':'Down'}`;
+
+    const tips = [
+        "Switch to LED bulbs to save ~0.8 kg CO₂/month",
+        "Unplug devices when not in use",
+        "Use fans instead of AC when possible",
+        "Wash clothes in cold water",
+        "Air-dry clothes to save 1.2 kg CO₂/load"
+    ];
+    const tipHTML = tips.sort(()=>0.5-Math.random()).slice(0,2).map(t=>`<p>• ${t}</p>`).join('');
+    document.getElementById('ai-tips').innerHTML = tipHTML;
+}
+
+// Button handlers
+document.getElementById('btnDaily').onclick = ()=>updateCO2Chart('daily');
+document.getElementById('btnMonthly').onclick = ()=>updateCO2Chart('monthly');
+window.addEventListener('load', loadHistoryAndShow);
+</script>
+</body>
+</html>

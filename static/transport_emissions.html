@@ -523,6 +523,10 @@
                             <div class="data-group">
                                 <h3>Travel Details</h3>
                                 <div class="data-item">
+                                    <span class="data-label">Date</span>
+                                    <span class="data-value" id="result-date">—</span>
+                                </div>
+                                <div class="data-item">
                                     <span class="data-label">Transport Mode:</span>
                                     <span class="data-value" id="result-mode">No data yet</span>
                                 </div>
@@ -679,6 +683,7 @@
             console.log('Server response:', result);
 
             // Update results
+            document.getElementById('result-date').textContent = new Date(result.timestamp).toLocaleString();
             document.getElementById('result-mode').textContent = 
                 result.transport_mode.charAt(0).toUpperCase() + result.transport_mode.slice(1);
             document.getElementById('result-distance').textContent = result.distance_km + ' km';
@@ -711,6 +716,7 @@
     function generateSuggestions(records) {
         const suggestionsList = document.getElementById('suggestions-list');
         suggestionsList.innerHTML = '';  // clear old
+        // generateSuggestions() – add a “last trip date” line
 
         if (records.length === 0) {
             suggestionsList.innerHTML = '<p style="color: var(--medium-green); font-style: italic;">No data yet – make a trip calculation!</p>';
@@ -729,6 +735,18 @@
 
         // --- Generate tips ---
         const tips = [];
+ 
+    if (records.length > 0) {
+        const last = records[records.length - 1];
+        const dateStr = new Date(last.timestamp).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        tips.push(`Last trip: <strong>${dateStr}</strong>`);
+    }
 
         // Tip 1: Most used mode
         if (mostUsedMode.includes('petrol') || mostUsedMode.includes('diesel')) {
@@ -778,6 +796,7 @@
         document.getElementById('processing-indicator').style.display = 'none';
         document.getElementById('results-content').style.display = 'block';
         document.getElementById('result-mode').textContent = 'No data yet';
+        document.getElementById('result-date').textContent = '-';
         document.getElementById('result-distance').textContent = 'No data yet';
         document.getElementById('result-emissions').textContent = '0';
         console.log('Form cleared');
@@ -936,7 +955,20 @@
                         plugins: {
                             title: { display: true, text: title, font: { size: 16 } },
                             legend: { position: 'top' },
-                            tooltip: { mode: 'index', intersect: false }
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    // Show timestamp in tooltip
+                                    afterLabel: function(context) {
+                                        // context.datasetIndex === 0 → history dataset
+                                        if (context.datasetIndex !== 0) return '';
+                                        const record = data[context.dataIndex];
+                                        if (!record || !record.timestamp) return '';
+                                        return 'Date: ' + new Date(record.timestamp).toLocaleString();
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             y: { beginAtZero: true, title: { display: true, text: 'kg CO₂' } },
